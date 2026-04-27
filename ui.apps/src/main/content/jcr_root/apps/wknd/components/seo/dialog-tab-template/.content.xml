@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Template/Policy variant of the SEO tab.
+    This keeps manual defaults only (no AI generation controls),
+    because template policies are authored before page content exists.
+-->
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    sling:resourceType="granite/ui/components/coral/foundation/container"
+    granite:class="wknd-seo-dialog wknd-seo-dialog-template"
+    margin="{Boolean}true">
+    <items jcr:primaryType="nt:unstructured">
+        <columns
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"
+            margin="{Boolean}true">
+            <items jcr:primaryType="nt:unstructured">
+                <column
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                    <items jcr:primaryType="nt:unstructured">
+                        <enabled
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                            name="./seo/enabled"
+                            text="Emit Schema.org / JSON-LD on pages using this template"
+                            value="{Boolean}true"
+                            uncheckedValue="{Boolean}false"
+                            checked="{Boolean}true"/>
+
+                        <mode
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                            fieldLabel="Default Strategy"
+                            fieldDescription="Default page-level behavior vs template defaults."
+                            name="./seo/mode">
+                            <items jcr:primaryType="nt:unstructured">
+                                <merge
+                                    jcr:primaryType="nt:unstructured"
+                                    text="Merge with template defaults (recommended)"
+                                    value="merge"
+                                    selected="{Boolean}true"/>
+                                <override
+                                    jcr:primaryType="nt:unstructured"
+                                    text="Override template defaults"
+                                    value="override"/>
+                                <disable
+                                    jcr:primaryType="nt:unstructured"
+                                    text="Disable (no JSON-LD)"
+                                    value="disable"/>
+                            </items>
+                        </mode>
+
+                        <type
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                            fieldLabel="Default Primary @type"
+                            name="./seo/type"
+                            emptyText="Select a type">
+                            <items jcr:primaryType="nt:unstructured">
+                                <webpage jcr:primaryType="nt:unstructured" text="WebPage" value="WebPage" selected="{Boolean}true"/>
+                                <article jcr:primaryType="nt:unstructured" text="Article" value="Article"/>
+                                <newsArt jcr:primaryType="nt:unstructured" text="NewsArticle" value="NewsArticle"/>
+                                <blog jcr:primaryType="nt:unstructured" text="BlogPosting" value="BlogPosting"/>
+                                <product jcr:primaryType="nt:unstructured" text="Product" value="Product"/>
+                                <event jcr:primaryType="nt:unstructured" text="Event" value="Event"/>
+                                <faq jcr:primaryType="nt:unstructured" text="FAQPage" value="FAQPage"/>
+                                <howto jcr:primaryType="nt:unstructured" text="HowTo" value="HowTo"/>
+                                <org jcr:primaryType="nt:unstructured" text="Organization" value="Organization"/>
+                                <person jcr:primaryType="nt:unstructured" text="Person" value="Person"/>
+                                <place jcr:primaryType="nt:unstructured" text="Place" value="Place"/>
+                                <recipe jcr:primaryType="nt:unstructured" text="Recipe" value="Recipe"/>
+                                <video jcr:primaryType="nt:unstructured" text="VideoObject" value="VideoObject"/>
+                                <breadcrumb jcr:primaryType="nt:unstructured" text="BreadcrumbList" value="BreadcrumbList"/>
+                            </items>
+                        </type>
+
+                        <headline
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                            fieldLabel="Default Headline"
+                            name="./seo/headline"/>
+
+                        <description
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                            fieldLabel="Default Description"
+                            name="./seo/description"
+                            rows="{Long}3"/>
+
+                        <author
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                            fieldLabel="Default Author"
+                            name="./seo/author"/>
+
+                        <datePublished
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/datepicker"
+                            fieldLabel="Default Date Published"
+                            name="./seo/datePublished"
+                            type="datetime"
+                            displayedFormat="YYYY-MM-DD HH:mm"
+                            valueFormat="YYYY-MM-DDTHH:mmZ"/>
+
+                        <dateModified
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/datepicker"
+                            fieldLabel="Default Date Modified"
+                            name="./seo/dateModified"
+                            type="datetime"
+                            displayedFormat="YYYY-MM-DD HH:mm"
+                            valueFormat="YYYY-MM-DDTHH:mmZ"/>
+
+                        <image
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                            fieldLabel="Default Primary Image"
+                            name="./seo/image"
+                            rootPath="/content/dam"/>
+
+                        <keywords
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                            fieldLabel="Default Keywords">
+                            <field
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                name="./seo/keywords"/>
+                        </keywords>
+
+                        <jsonLd
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                            granite:class="wknd-seo-jsonld"
+                            fieldLabel="Default JSON-LD (optional)"
+                            fieldDescription="Optional template-level raw JSON-LD fallback. Page-level JSON-LD can override this."
+                            name="./seo/jsonLd"
+                            rows="{Long}10"
+                            resizable="vertical"/>
+                    </items>
+                </column>
+            </items>
+        </columns>
+    </items>
+</jcr:root>

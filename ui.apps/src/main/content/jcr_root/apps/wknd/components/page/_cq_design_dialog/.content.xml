@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Template-level (Policy) design dialog extension.
+
+    Adds a "Schema.org Defaults" tab to the policy dialog of the
+    wknd page component. Values set here act as *defaults* inherited by
+    every page that uses the template. Page-level values (stored under
+    jcr:content/seo) override / merge these depending on the selected
+    strategy.
+
+    On a policy node the data lives under:
+        .../policies/jcr:content/.../wknd/components/page/<policy>/seo
+    which is resolved by SeoSchemaModel through the ContentPolicyManager.
+-->
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="Page Policy"
+    sling:resourceType="cq/gui/components/authoring/dialog"
+    extraClientlibs="[wknd.seo.authoring]"
+    helpPath="https://schema.org/">
+    <content jcr:primaryType="nt:unstructured">
+        <items jcr:primaryType="nt:unstructured">
+            <tabs jcr:primaryType="nt:unstructured">
+                <items jcr:primaryType="nt:unstructured">
+                    <!-- SEO defaults tab - container wraps the reusable fragment -->
+                    <seoDefaults
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Schema.org Defaults"
+                        sling:resourceType="granite/ui/components/coral/foundation/container">
+                        <items jcr:primaryType="nt:unstructured">
+                            <seoContent
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/include"
+                                path="/apps/wknd/components/seo/dialog-tab-template"/>
+                        </items>
+                    </seoDefaults>
+                </items>
+            </tabs>
+        </items>
+    </content>
+</jcr:root>

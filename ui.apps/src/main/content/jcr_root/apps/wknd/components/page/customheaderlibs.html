@@ -29,3 +29,13 @@
 
 <!--/* Favicons */-->
 <sly data-sly-include="favicons.html"></sly>
+
+<!--/*
+    Schema.org / JSON-LD structured data (AEO / GEO).
+    Merges template (policy) defaults with page-level values via
+    com.adobe.aem.guides.wknd.core.seo.models.SeoSchemaModel. Safe no-op when disabled.
+*/-->
+<sly data-sly-use.seo="com.adobe.aem.guides.wknd.core.seo.models.SeoSchemaModel"
+     data-sly-test="${seo.enabled}">
+    <script type="application/ld+json">${seo.jsonLd @ context='unsafe'}</script>
+</sly>

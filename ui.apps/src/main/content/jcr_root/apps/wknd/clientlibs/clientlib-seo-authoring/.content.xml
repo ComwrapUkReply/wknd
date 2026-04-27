@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Granite UI authoring clientlib for the SEO / Schema.org dialog.
+    Pulled in by the page cq:dialog and cq:design_dialog via
+    extraClientlibs=[wknd.seo.authoring].
+-->
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:ClientLibraryFolder"
+    allowProxy="{Boolean}true"
+    categories="[wknd.seo.authoring]"
+    jsProcessor="[default:none,min:none]"/>

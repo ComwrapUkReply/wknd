@@ -1,0 +1,7 @@
+{
+  "enabled": false,
+  "baseUrl": "$[env:OLLAMA_BASE_URL;default=http://localhost:11434]",
+  "model": "$[env:OLLAMA_MODEL;default=llama3.2]",
+  "timeoutSeconds": 120,
+  "maxBodyChars": 8000
+}

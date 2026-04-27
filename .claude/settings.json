@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm /Users/Szymon/DEV/github/aem-guides-wknd/core/src/main/java/com/adobe/aem/guides/wknd/core/seo/SchemaOrgPublishValidator.java)",
+      "Bash(rm /Users/Szymon/DEV/github/aem-guides-wknd/ui.config/src/main/content/jcr_root/apps/wknd/osgiconfig/config.author/org.apache.sling.serviceusermapping.impl.ServiceUserMapperImpl.amended~wknd-seo.cfg.json)"
+    ]
+  }
+}

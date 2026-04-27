@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Reusable Granite UI container: "Schema.org" tab contents.
+
+    Used by:
+      - /apps/wknd/components/page/_cq_dialog (Page Properties)
+      - /apps/wknd/components/page/_cq_design_dialog (Template / Policy)
+
+    Include via:
+      sling:resourceType="granite/ui/components/coral/foundation/include"
+      path="/apps/wknd/components/seo/dialog-tab"
+
+    Stored properties (under ./seo):
+      ./seo/enabled         (Boolean)   - emit JSON-LD on render
+      ./seo/mode            (String)    - "override" | "merge" (vs. template defaults)
+      ./seo/type            (String)    - primary schema.org @type
+      ./seo/headline        (String)
+      ./seo/description     (String)
+      ./seo/author          (String)
+      ./seo/datePublished   (Date)
+      ./seo/dateModified    (Date)
+      ./seo/image           (String, DAM path)
+      ./seo/keywords        (String[])
+      ./seo/jsonLd          (String, multi-line raw JSON-LD override)
+      ./seo/aiPrompt        (String, last prompt used to generate)
+      ./seo/aiProvider      (String)
+-->
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    sling:resourceType="granite/ui/components/coral/foundation/container"
+    granite:class="wknd-seo-dialog"
+    margin="{Boolean}true">
+    <items jcr:primaryType="nt:unstructured">
+        <columns
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"
+            margin="{Boolean}true">
+            <items jcr:primaryType="nt:unstructured">
+                <column
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                    <items jcr:primaryType="nt:unstructured">
+
+                        <!-- On/Off switch for emitting schema.org -->
+                        <enabled
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                            name="./seo/enabled"
+                            text="Emit Schema.org / JSON-LD on this page"
+                            value="{Boolean}true"
+                            uncheckedValue="{Boolean}false"
+                            checked="{Boolean}true"/>
+
+                        <!-- Merge vs override template defaults -->
+                        <mode
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                            fieldLabel="Strategy vs. Template Defaults"
+                            fieldDescription="How page-level Schema.org data combines with template defaults."
+                            name="./seo/mode">
+                            <items jcr:primaryType="nt:unstructured">
+                                <merge
+                                    jcr:primaryType="nt:unstructured"
+                                    text="Merge with template defaults (recommended)"
+                                    value="merge"
+                                    selected="{Boolean}true"/>
+                                <override
+                                    jcr:primaryType="nt:unstructured"
+                                    text="Override template defaults"
+                                    value="override"/>
+                                <disable
+                                    jcr:primaryType="nt:unstructured"
+                                    text="Disable (no JSON-LD)"
+                                    value="disable"/>
+                            </items>
+                        </mode>
+
+                        <!-- Primary schema.org @type -->
+                        <type
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                            fieldLabel="Primary @type"
+                            fieldDescription="Main schema.org type for this page."
+                            name="./seo/type"
+                            emptyText="Select a type">
+                            <items jcr:primaryType="nt:unstructured">
+                                <webpage jcr:primaryType="nt:unstructured" text="WebPage"       value="WebPage" selected="{Boolean}true"/>
+                                <article jcr:primaryType="nt:unstructured" text="Article"       value="Article"/>
+                                <newsArt jcr:primaryType="nt:unstructured" text="NewsArticle"   value="NewsArticle"/>
+                                <blog    jcr:primaryType="nt:unstructured" text="BlogPosting"   value="BlogPosting"/>
+                                <product jcr:primaryType="nt:unstructured" text="Product"       value="Product"/>
+                                <event   jcr:primaryType="nt:unstructured" text="Event"         value="Event"/>
+                                <faq     jcr:primaryType="nt:unstructured" text="FAQPage"       value="FAQPage"/>
+                                <howto   jcr:primaryType="nt:unstructured" text="HowTo"         value="HowTo"/>
+                                <org     jcr:primaryType="nt:unstructured" text="Organization"  value="Organization"/>
+                                <person  jcr:primaryType="nt:unstructured" text="Person"        value="Person"/>
+                                <place   jcr:primaryType="nt:unstructured" text="Place"         value="Place"/>
+                                <recipe  jcr:primaryType="nt:unstructured" text="Recipe"        value="Recipe"/>
+                                <video   jcr:primaryType="nt:unstructured" text="VideoObject"   value="VideoObject"/>
+                                <breadcrumb jcr:primaryType="nt:unstructured" text="BreadcrumbList" value="BreadcrumbList"/>
+                            </items>
+                        </type>
+
+                        <!-- Common descriptive fields -->
+                        <headline
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                            fieldLabel="Headline"
+                            fieldDescription="schema:headline / og:title override. Leave blank to fall back to jcr:title."
+                            name="./seo/headline"/>
+
+                        <description
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                            fieldLabel="Description"
+                            fieldDescription="schema:description. Leave blank to fall back to jcr:description."
+                            name="./seo/description"
+                            rows="{Long}3"/>
+
+                        <author
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                            fieldLabel="Author"
+                            fieldDescription="schema:author name."
+                            name="./seo/author"/>
+
+                        <datePublished
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/datepicker"
+                            fieldLabel="Date Published"
+                            name="./seo/datePublished"
+                            type="datetime"
+                            displayedFormat="YYYY-MM-DD HH:mm"
+                            valueFormat="YYYY-MM-DDTHH:mmZ"/>
+
+                        <dateModified
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/datepicker"
+                            fieldLabel="Date Modified"
+                            name="./seo/dateModified"
+                            type="datetime"
+                            displayedFormat="YYYY-MM-DD HH:mm"
+                            valueFormat="YYYY-MM-DDTHH:mmZ"/>
+
+                        <image
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                            fieldLabel="Primary Image"
+                            fieldDescription="DAM path for schema:image / og:image."
+                            name="./seo/image"
+                            rootPath="/content/dam"/>
+
+                        <keywords
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                            fieldLabel="Keywords"
+                            fieldDescription="Each value becomes a schema:keywords entry.">
+                            <field
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                name="./seo/keywords"/>
+                        </keywords>
+
+                        <!-- Notice shown only in the Create Page wizard -->
+                        <wizardNotice
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/alert"
+                            variant="info"
+                            header="Add page content first"
+                            text="The AI generator reads your page body to produce Schema.org markup. Add content to the page, then open Page Properties to use Generate with AI.">
+                            <granite:rendercondition
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/renderconditions/simple"
+                                condition="${requestPathInfo.resourcePath.contains('createpagewizard')}"/>
+                        </wizardNotice>
+
+                        <!-- AI generation UI -->
+                        <aiPanel
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/well">
+                            <items jcr:primaryType="nt:unstructured">
+                                <aiHeading
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/heading"
+                                    level="{Long}3"
+                                    text="AI-assisted generation"/>
+                                <aiHelp
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                    text="Drafts JSON-LD from the current page content. Review before saving."/>
+
+                                <aiPrompt
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                                    fieldLabel="Additional instructions (optional)"
+                                    fieldDescription="Extra guidance for the AI (e.g. 'emphasize local SEO', 'include FAQ items')."
+                                    name="./seo/aiPrompt"
+                                    rows="{Long}2"/>
+
+                                <aiProvider
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                    fieldLabel="Provider"
+                                    name="./seo/aiProvider">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <default jcr:primaryType="nt:unstructured" text="Default (configured)" value="" selected="{Boolean}true"/>
+                                        <openai  jcr:primaryType="nt:unstructured" text="OpenAI"              value="openai"/>
+                                        <gemini  jcr:primaryType="nt:unstructured" text="Google Gemini"       value="gemini"/>
+                                        <ollama  jcr:primaryType="nt:unstructured" text="Ollama (local LLM)"  value="ollama"/>
+                                    </items>
+                                </aiProvider>
+
+                                <aiGenerateButton
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                                    granite:class="wknd-seo-generate"
+                                    text="Generate with AI"
+                                    variant="primary"
+                                    icon="gears"
+                                    type="button"/>
+                            </items>
+                        </aiPanel>
+
+                        <!-- Raw JSON-LD (output of AI, manually editable) -->
+                        <jsonLd
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                            granite:class="wknd-seo-jsonld"
+                            fieldLabel="JSON-LD"
+                            fieldDescription="Raw JSON-LD. When present this is emitted verbatim. The AI button fills this field."
+                            name="./seo/jsonLd"
+                            rows="{Long}14"
+                            resizable="vertical"/>
+
+                    </items>
+                </column>
+            </items>
+        </columns>
+    </items>
+</jcr:root>

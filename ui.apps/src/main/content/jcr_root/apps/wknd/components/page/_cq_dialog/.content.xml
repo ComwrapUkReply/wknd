@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Page Properties dialog extension for the WKND page component.
+
+    Inherits from:
+      core/wcm/components/page/v3/page/cq:dialog
+    via the page component's sling:resourceSuperType. The Sling Resource
+    Merger deep-merges this fragment into the core Page Properties dialog,
+    so we only declare the *delta*: a new "Schema.org" tab, ordered
+    right after the "Basic" tab.
+
+    Actual fields live in the reusable fragment:
+      /apps/wknd/components/seo/dialog-tab
+-->
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="Page Properties"
+    sling:resourceType="cq/gui/components/authoring/dialog"
+    extraClientlibs="[wknd.seo.authoring]"
+    helpPath="https://schema.org/">
+    <content
+        jcr:primaryType="nt:unstructured"
+        sling:resourceMerge="{Boolean}true">
+        <items
+            jcr:primaryType="nt:unstructured"
+            sling:resourceMerge="{Boolean}true">
+            <tabs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceMerge="{Boolean}true">
+                <items
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceMerge="{Boolean}true">
+                    <!-- Schema.org tab - container wraps the reusable fragment -->
+                    <seo
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Schema.org"
+                        sling:resourceType="granite/ui/components/coral/foundation/container"
+                        sling:orderBefore="advanced">
+                        <items jcr:primaryType="nt:unstructured">
+                            <seoContent
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/include"
+                                path="/apps/wknd/components/seo/dialog-tab"/>
+                        </items>
+                    </seo>
+                </items>
+            </tabs>
+        </items>
+    </content>
+</jcr:root>

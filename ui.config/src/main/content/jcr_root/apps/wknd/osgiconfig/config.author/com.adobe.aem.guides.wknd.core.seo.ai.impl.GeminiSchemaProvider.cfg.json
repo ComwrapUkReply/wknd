@@ -1,0 +1,7 @@
+{
+  "apiKey": "$[secret:GEMINI_API_KEY]",
+  "baseUrl": "$[env:GEMINI_BASE_URL;default=https://generativelanguage.googleapis.com/v1beta/models]",
+  "model": "$[env:GEMINI_MODEL;default=gemini-2.0-flash]",
+  "timeoutSeconds": 30,
+  "maxBodyChars": 8000
+}

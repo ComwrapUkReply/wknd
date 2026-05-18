@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(rm /Users/Szymon/DEV/github/aem-guides-wknd/core/src/main/java/com/adobe/aem/guides/wknd/core/seo/SchemaOrgPublishValidator.java)",
-      "Bash(rm /Users/Szymon/DEV/github/aem-guides-wknd/ui.config/src/main/content/jcr_root/apps/wknd/osgiconfig/config.author/org.apache.sling.serviceusermapping.impl.ServiceUserMapperImpl.amended~wknd-seo.cfg.json)"
+      "Bash(rm /Users/Szymon/DEV/github/aem-guides-wknd/ui.config/src/main/content/jcr_root/apps/wknd/osgiconfig/config.author/org.apache.sling.serviceusermapping.impl.ServiceUserMapperImpl.amended~wknd-seo.cfg.json)",
+      "Bash(ls -d /Users/Szymon/DEV/github/aem-guides-wknd/ui.apps/src/main/content/jcr_root/apps/wknd/components/*/)",
+      "Bash(grep -r sling:resourceType /Users/Szymon/DEV/github/aem-guides-wknd/ui.apps/src/main/content/jcr_root/apps/wknd/components/*/.content.xml)",
+      "Read(//Users/Szymon/DEV/github/aem-guides-wknd/**)",
+      "Bash(xargs basename:*)",
+      "Bash(wc -l /Users/Szymon/DEV/github/aem-guides-wknd/core/src/main/java/com/adobe/aem/guides/wknd/core/seo/ai/impl/*.java)"
     ]
   }
 }

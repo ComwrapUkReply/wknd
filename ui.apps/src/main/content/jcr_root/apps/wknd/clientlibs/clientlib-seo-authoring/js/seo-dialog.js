@@ -24,6 +24,7 @@
 
     const CONFIG = Object.freeze({
         endpoint: '/bin/wknd/seo/generate',
+        articleTypes: ['Article', 'NewsArticle', 'BlogPosting'],
         selectors: {
             root:        '.wknd-seo-dialog',
             button:      '.wknd-seo-generate',
@@ -31,6 +32,11 @@
             schemaType:  '[name="./seo/type"]',
             authorPrompt:'[name="./seo/aiPrompt"]',
             provider:    '[name="./seo/aiProvider"]',
+            articleGroup: '.wknd-seo-article-fields',
+            seoHeadline:    '[name="./seo/headline"]',
+            seoDescription: '[name="./seo/description"]',
+            pageTitle:       '[name="./jcr:title"]',
+            pageDescription: '[name="./jcr:description"]',
         },
         classes: {
             busy: 'is-busy',
@@ -75,6 +81,54 @@
             return (api.getValue() || '').toString();
         }
         return ($el.val() || '').toString();
+    }
+
+    /** Toggle the article-specific field group based on selected @type. */
+    function toggleArticleFields($root) {
+        const selectedType = readField($root, CONFIG.selectors.schemaType);
+        const show = CONFIG.articleTypes.indexOf(selectedType) !== -1;
+        const $groups = $root.find(CONFIG.selectors.articleGroup);
+        $groups.each(function eachGroup() {
+            const $group = $(this);
+            if (show) {
+                $group.show();
+                $group.find(':input').prop('disabled', false);
+            } else {
+                $group.hide();
+                $group.find(':input').prop('disabled', true);
+            }
+        });
+    }
+
+    /**
+     * Pre-fill headline and description from the Basic tab (jcr:title / jcr:description)
+     * when the Schema.org fields are blank. The Basic tab fields live outside $root,
+     * so we search the whole document form.
+     */
+    function prefillFromPageBasic($root) {
+        const $form = $root.closest('form').length ? $root.closest('form') : $(document);
+
+        function getFieldValue(selector) {
+            const $el = $form.find(selector).first();
+            if (!$el.length) { return ''; }
+            const api = $el.adaptTo ? $el.adaptTo('foundation-field') : null;
+            if (api && typeof api.getValue === 'function') {
+                return (api.getValue() || '').toString().trim();
+            }
+            return ($el.val() || '').toString().trim();
+        }
+
+        const currentHeadline    = getFieldValue(CONFIG.selectors.seoHeadline);
+        const currentDescription = getFieldValue(CONFIG.selectors.seoDescription);
+
+        if (!currentHeadline) {
+            const title = getFieldValue(CONFIG.selectors.pageTitle);
+            if (title) { writeField($root, CONFIG.selectors.seoHeadline, title); }
+        }
+        if (!currentDescription) {
+            const desc = getFieldValue(CONFIG.selectors.pageDescription);
+            if (desc) { writeField($root, CONFIG.selectors.seoDescription, desc); }
+        }
     }
 
     /** Write a value to a field, preferring the foundation-field API. */
@@ -171,6 +225,18 @@
         $roots.each(function bindEach() {
             const $root = $(this);
             const $buttons = $root.find(CONFIG.selectors.button);
+            const $type = $root.find(CONFIG.selectors.schemaType).first();
+
+            // Initial state and reactive updates for conditional article fields.
+            toggleArticleFields($root);
+
+            // Pre-populate headline/description from Basic tab if currently blank.
+            prefillFromPageBasic($root);
+
+            $type.off('change.wkndSeoType').on('change.wkndSeoType', function onTypeChange() {
+                toggleArticleFields($root);
+            });
+
             $buttons.off(CONFIG.events.click).on(CONFIG.events.click, function onClick(e) {
                 e.preventDefault();
                 onGenerate($root, $(this));

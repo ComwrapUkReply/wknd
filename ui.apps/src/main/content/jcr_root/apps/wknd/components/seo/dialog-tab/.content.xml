@@ -105,6 +105,82 @@
                             </items>
                         </type>
 
+                        <!-- Article-like fields (Article / NewsArticle / BlogPosting only) -->
+                        <articleFields
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/well"
+                            granite:class="wknd-seo-article-fields"
+                            data-show-for-types="Article,NewsArticle,BlogPosting">
+                            <items jcr:primaryType="nt:unstructured">
+                                <articleHeading
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/heading"
+                                    level="{Long}4"
+                                    text="Article-specific properties"/>
+                                <articleHelp
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                    text="These fields apply only to Article, NewsArticle, and BlogPosting types."/>
+
+                                <articleSection
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    fieldLabel="Article Section"
+                                    fieldDescription="schema:articleSection (e.g. Travel, Culture, Technology)."
+                                    name="./seo/articleSection"/>
+
+                                <wordCount
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/numberfield"
+                                    fieldLabel="Word Count"
+                                    fieldDescription="schema:wordCount as an integer."
+                                    name="./seo/wordCount"
+                                    min="{Long}0"
+                                    step="{Long}1"/>
+
+                                <publisherName
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    fieldLabel="Publisher Name"
+                                    fieldDescription="schema:publisher.name."
+                                    name="./seo/publisherName"/>
+
+                                <publisherLogo
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                    fieldLabel="Publisher Logo"
+                                    fieldDescription="schema:publisher.logo URL or DAM path."
+                                    name="./seo/publisherLogo"
+                                    rootPath="/content/dam"/>
+
+                                <authorType
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                    fieldLabel="Author Type"
+                                    fieldDescription="schema:author @type for article-like content."
+                                    name="./seo/authorType">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <person
+                                            jcr:primaryType="nt:unstructured"
+                                            text="Person"
+                                            value="Person"
+                                            selected="{Boolean}true"/>
+                                        <organization
+                                            jcr:primaryType="nt:unstructured"
+                                            text="Organization"
+                                            value="Organization"/>
+                                    </items>
+                                </authorType>
+
+                                <authorUrl
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    fieldLabel="Author URL"
+                                    fieldDescription="schema:author.url (optional)."
+                                    name="./seo/authorUrl"/>
+                            </items>
+                        </articleFields>
+
                         <!-- Common descriptive fields -->
                         <headline
                             jcr:primaryType="nt:unstructured"

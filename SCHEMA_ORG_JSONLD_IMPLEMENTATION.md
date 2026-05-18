@@ -89,6 +89,30 @@ Authors can fully manage Schema data manually using:
 
 This means authors can always replace AI output with manual edits.
 
+## Article-Specific Fields (Type-Driven)
+
+For `Article`, `NewsArticle`, and `BlogPosting`, additional fields are available
+on both Page and Template dialogs:
+
+- `articleSection`
+- `wordCount`
+- `publisherName`
+- `publisherLogo`
+- `authorType` (`Person` / `Organization`)
+- `authorUrl`
+
+These fields are conditionally shown only when the selected `@type` is one of
+the article-like types above.
+
+Rendering behavior:
+
+- `articleSection` -> `articleSection`
+- `wordCount` -> `wordCount`
+- `publisherName` + `publisherLogo` -> `publisher` object
+- `authorType` + `author` + `authorUrl` -> `author` object
+
+For non-article types, existing generic mapping remains unchanged.
+
 ## OSGi Configuration (AI Provider)
 
 Config file:

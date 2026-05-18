@@ -74,11 +74,20 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
     private static final String PN_IMAGE          = "image";
     private static final String PN_KEYWORDS       = "keywords";
     private static final String PN_JSON_LD        = "jsonLd";
+    private static final String PN_ARTICLE_SECTION = "articleSection";
+    private static final String PN_WORD_COUNT      = "wordCount";
+    private static final String PN_PUBLISHER_NAME  = "publisherName";
+    private static final String PN_PUBLISHER_LOGO  = "publisherLogo";
+    private static final String PN_AUTHOR_TYPE     = "authorType";
+    private static final String PN_AUTHOR_URL      = "authorUrl";
 
     private static final String MODE_DISABLE  = "disable";
     private static final String MODE_OVERRIDE = "override";
     private static final String DEFAULT_TYPE  = "WebPage";
     private static final String SCHEMA_CONTEXT = "https://schema.org";
+    private static final String TYPE_ARTICLE = "Article";
+    private static final String TYPE_NEWS_ARTICLE = "NewsArticle";
+    private static final String TYPE_BLOG_POSTING = "BlogPosting";
 
     // ---- Injections -------------------------------------------------------
 
@@ -220,6 +229,13 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
         final String image       = pickString(page, override ? null : policy, PN_IMAGE);
         final String datePub     = pickDate(page, override ? null : policy, PN_DATE_PUBLISHED);
         final String dateMod     = pickDate(page, override ? null : policy, PN_DATE_MODIFIED);
+        final String articleSection = pickString(page, override ? null : policy, PN_ARTICLE_SECTION);
+        final String publisherName  = pickString(page, override ? null : policy, PN_PUBLISHER_NAME);
+        final String publisherLogo  = pickString(page, override ? null : policy, PN_PUBLISHER_LOGO);
+        final String authorType     = StringUtils.defaultIfBlank(
+                pickString(page, override ? null : policy, PN_AUTHOR_TYPE), "Person");
+        final String authorUrl      = pickString(page, override ? null : policy, PN_AUTHOR_URL);
+        final Long wordCount        = pickLong(page, override ? null : policy, PN_WORD_COUNT);
         final List<String> keywords = pickList(page, override ? null : policy, PN_KEYWORDS);
 
         if (StringUtils.isBlank(headline) && StringUtils.isBlank(description)
@@ -240,7 +256,17 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
         if (StringUtils.isNotBlank(description)) { b.add("description", description); }
         if (StringUtils.isNotBlank(image))       { b.add("image", image); }
         if (StringUtils.isNotBlank(author)) {
-            b.add("author", Json.createObjectBuilder().add("@type", "Person").add("name", author));
+            if (isArticleLikeType(type)) {
+                final JsonObjectBuilder authorObject = Json.createObjectBuilder()
+                        .add("@type", sanitizeAuthorType(authorType))
+                        .add("name", author);
+                if (StringUtils.isNotBlank(authorUrl)) {
+                    authorObject.add("url", authorUrl);
+                }
+                b.add("author", authorObject);
+            } else {
+                b.add("author", Json.createObjectBuilder().add("@type", "Person").add("name", author));
+            }
         }
         if (StringUtils.isNotBlank(datePub)) { b.add("datePublished", datePub); }
         if (StringUtils.isNotBlank(dateMod)) { b.add("dateModified", dateMod); }
@@ -251,6 +277,26 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
         }
         final String lang = pageLanguage();
         if (StringUtils.isNotBlank(lang)) { b.add("inLanguage", lang); }
+
+        if (isArticleLikeType(type)) {
+            if (StringUtils.isNotBlank(articleSection)) {
+                b.add("articleSection", articleSection);
+            }
+            if (wordCount != null && wordCount.longValue() >= 0L) {
+                b.add("wordCount", wordCount.longValue());
+            }
+            if (StringUtils.isNotBlank(publisherName) || StringUtils.isNotBlank(publisherLogo)) {
+                final JsonObjectBuilder publisherObject = Json.createObjectBuilder()
+                        .add("@type", "Organization");
+                if (StringUtils.isNotBlank(publisherName)) {
+                    publisherObject.add("name", publisherName);
+                }
+                if (StringUtils.isNotBlank(publisherLogo)) {
+                    publisherObject.add("logo", publisherLogo);
+                }
+                b.add("publisher", publisherObject);
+            }
+        }
 
         return b.build();
     }
@@ -279,6 +325,42 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
         final String[] t = (policy != null) ? policy.get(key, String[].class) : null;
         if (t != null && t.length > 0) { return new ArrayList<>(Arrays.asList(t)); }
         return Collections.emptyList();
+    }
+
+    private Long pickLong(final ValueMap page, final ValueMap policy, final String key) {
+        final Long pLong = (page != null) ? page.get(key, Long.class) : null;
+        if (pLong != null) { return pLong; }
+        final Integer pInt = (page != null) ? page.get(key, Integer.class) : null;
+        if (pInt != null) { return Long.valueOf(pInt.longValue()); }
+        final String pStr = (page != null) ? page.get(key, String.class) : null;
+        final Long parsedPage = parseLongSafe(pStr);
+        if (parsedPage != null) { return parsedPage; }
+
+        final Long tLong = (policy != null) ? policy.get(key, Long.class) : null;
+        if (tLong != null) { return tLong; }
+        final Integer tInt = (policy != null) ? policy.get(key, Integer.class) : null;
+        if (tInt != null) { return Long.valueOf(tInt.longValue()); }
+        final String tStr = (policy != null) ? policy.get(key, String.class) : null;
+        return parseLongSafe(tStr);
+    }
+
+    private Long parseLongSafe(final String value) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        try {
+            return Long.valueOf(value.trim());
+        } catch (final NumberFormatException nfe) {
+            return null;
+        }
+    }
+
+    private boolean isArticleLikeType(final String type) {
+        return TYPE_ARTICLE.equals(type) || TYPE_NEWS_ARTICLE.equals(type) || TYPE_BLOG_POSTING.equals(type);
+    }
+
+    private String sanitizeAuthorType(final String authorType) {
+        return "Organization".equals(authorType) ? "Organization" : "Person";
     }
 
     // ---- Page metadata helpers --------------------------------------------

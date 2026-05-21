@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Bulk Schema Enrichment — Granite UI tool page.
+    URL: /apps/wknd/tools/seoBulkManager.html
+    Loads wknd.seo.bulk clientlib for JS form handling + progress polling.
+-->
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          jcr:primaryType="nt:unstructured"
+          jcr:title="Bulk Schema Enrichment"
+          sling:resourceType="granite/ui/components/coral/foundation/page"
+          extraClientlibs="[wknd.seo.bulk]">
+
+    <items jcr:primaryType="nt:unstructured">
+        <content
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/container">
+            <items jcr:primaryType="nt:unstructured">
+
+                <!-- ===== Form ===== -->
+                <form
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/form"
+                        action="/bin/wknd/seo/bulk.json"
+                        method="post"
+                        class="wknd-bulk-form"
+                        style="max-width:640px;padding:24px">
+
+                    <items jcr:primaryType="nt:unstructured">
+
+                        <!-- Root path picker -->
+                        <rootPath
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                fieldLabel="Root Path"
+                                fieldDescription="JCR path of the page subtree to enrich (e.g. /content/wknd/us/en)."
+                                name="rootPath"
+                                required="{Boolean}true"
+                                rootPath="/content"/>
+
+                        <!-- Action selector -->
+                        <action
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                fieldLabel="Action"
+                                name="action">
+                            <items jcr:primaryType="nt:unstructured">
+                                <defaults
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/option"
+                                        text="Template Defaults (fast — no AI)"
+                                        value="defaults"
+                                        selected="{Boolean}true"/>
+                                <ai
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/option"
+                                        text="AI Generation (calls provider per page)"
+                                        value="ai"/>
+                            </items>
+                        </action>
+
+                        <!-- Schema type selector -->
+                        <schemaType
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                fieldLabel="Schema Type"
+                                name="schemaType">
+                            <items jcr:primaryType="nt:unstructured">
+                                <auto
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/option"
+                                        text="Auto-detect (use existing or WebPage)"
+                                        value="auto"
+                                        selected="{Boolean}true"/>
+                                <WebPage
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/option"
+                                        text="WebPage"
+                                        value="WebPage"/>
+                                <Article
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/option"
+                                        text="Article"
+                                        value="Article"/>
+                                <BlogPosting
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/option"
+                                        text="BlogPosting"
+                                        value="BlogPosting"/>
+                            </items>
+                        </schemaType>
+
+                        <!-- Skip existing toggle -->
+                        <skipExisting
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                text="Skip pages that already have Schema.org enabled"
+                                name="skipExisting"
+                                value="true"/>
+
+                        <!-- Submit button -->
+                        <submit
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/submit"
+                                text="Start Bulk Enrichment"
+                                class="wknd-bulk-submit"/>
+
+                    </items>
+                </form>
+
+                <!-- ===== Progress panel (populated by bulk-manager.js) ===== -->
+                <progress
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/container"
+                        class="wknd-bulk-progress"
+                        style="max-width:640px;padding:0 24px;display:none"/>
+
+            </items>
+        </content>
+    </items>
+</jcr:root>

@@ -1,0 +1,5 @@
+{
+  "scripts": [
+    "create service user wknd-seo-bulk-service with path system/wknd\n\nset ACL for wknd-seo-bulk-service\n  allow jcr:read on /content\n  allow jcr:read,jcr:write,jcr:nodeTypeManagement,jcr:addChildNodes on /content/wknd\n  allow jcr:read,jcr:write,jcr:nodeTypeManagement,jcr:addChildNodes on /var/wknd/seo/jobs\nend\n\ncreate path (sling:Folder) /var/wknd\ncreate path (sling:Folder) /var/wknd/seo\ncreate path (sling:Folder) /var/wknd/seo/jobs"
+  ]
+}

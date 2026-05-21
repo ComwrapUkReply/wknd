@@ -1,0 +1,6 @@
+{
+  "maxPagesPerRun": 5000,
+  "maxErrorsBeforeAbort": 100,
+  "progressSaveIntervalPages": 10,
+  "aiRequestDelayMs": 200
+}

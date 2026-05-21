@@ -22,7 +22,6 @@ import javax.servlet.Servlet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
@@ -35,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
+import com.adobe.aem.guides.wknd.core.seo.PageTextExtractor;
 import com.adobe.aem.guides.wknd.core.seo.ai.GenerationRequest;
 import com.adobe.aem.guides.wknd.core.seo.ai.GenerationResult;
 import com.adobe.aem.guides.wknd.core.seo.ai.SchemaAiProvider;
@@ -69,11 +69,10 @@ public class SchemaAiServlet extends SlingAllMethodsServlet {
     private static final String PN_JCR_DESCRIPTION = "jcr:description";
     private static final int    MAX_BODY_CHARS      = 12000;
 
-    private static final String[] TEXT_PROPERTY_NAMES = {
-            "text", "jcr:title", "title", "headline", "description", "jcr:description", "cq:panelTitle"
-    };
-
     private static final Logger LOG = LoggerFactory.getLogger(SchemaAiServlet.class);
+
+    @Reference
+    private PageTextExtractor pageTextExtractor;
 
     // ---- Dynamic provider list --------------------------------------------
 
@@ -157,37 +156,10 @@ public class SchemaAiServlet extends SlingAllMethodsServlet {
                 .schemaType(schemaType)
                 .title(props == null ? null : props.get(PN_JCR_TITLE, String.class))
                 .description(props == null ? null : props.get(PN_JCR_DESCRIPTION, String.class))
-                .bodyText(extractBodyText(page))
+                .bodyText(pageTextExtractor.extractBodyText(page, MAX_BODY_CHARS))
                 .locale(page.getLanguage(false) != null ? page.getLanguage(false).toString() : null)
                 .authorPrompt(StringUtils.trimToNull(request.getParameter(PARAM_AUTHOR_PROMPT)))
                 .build();
-    }
-
-    private String extractBodyText(final Page page) {
-        final Resource content = page.getContentResource();
-        if (content == null) { return ""; }
-        final StringBuilder sb = new StringBuilder(4096);
-        collectText(content, sb);
-        return sb.length() > MAX_BODY_CHARS ? sb.substring(0, MAX_BODY_CHARS) : sb.toString();
-    }
-
-    private void collectText(final Resource res, final StringBuilder sb) {
-        if (res == null || sb.length() >= MAX_BODY_CHARS) { return; }
-        final ValueMap vm = res.getValueMap();
-        for (final String pn : TEXT_PROPERTY_NAMES) {
-            final String v = vm.get(pn, String.class);
-            if (StringUtils.isNotBlank(v)) {
-                sb.append(stripHtml(v)).append('\n');
-                if (sb.length() >= MAX_BODY_CHARS) { return; }
-            }
-        }
-        for (final Resource child : res.getChildren()) {
-            collectText(child, sb);
-        }
-    }
-
-    private String stripHtml(final String s) {
-        return s == null ? "" : s.replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ").trim();
     }
 
     private String nonNull(final String s) { return s == null ? "" : s; }

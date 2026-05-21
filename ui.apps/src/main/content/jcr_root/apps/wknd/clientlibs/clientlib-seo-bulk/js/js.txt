@@ -1,0 +1,2 @@
+#base=.
+bulk-manager.js

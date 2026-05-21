@@ -2,7 +2,7 @@
 <!--
     Template-level (Policy) design dialog extension.
 
-    Adds a "Schema.org Defaults" tab to the policy dialog of the
+    Adds a "Structured Data Defaults" tab to the policy dialog of the
     wknd page component. Values set here act as *defaults* inherited by
     every page that uses the template. Page-level values (stored under
     jcr:content/seo) override / merge these depending on the selected
@@ -26,10 +26,10 @@
         <items jcr:primaryType="nt:unstructured">
             <tabs jcr:primaryType="nt:unstructured">
                 <items jcr:primaryType="nt:unstructured">
-                    <!-- SEO defaults tab - container wraps the reusable fragment -->
+                    <!-- Structured Data defaults tab - container wraps the reusable fragment -->
                     <seoDefaults
                         jcr:primaryType="nt:unstructured"
-                        jcr:title="Schema.org Defaults"
+                        jcr:title="Structured Data Defaults"
                         sling:resourceType="granite/ui/components/coral/foundation/container">
                         <items jcr:primaryType="nt:unstructured">
                             <seoContent

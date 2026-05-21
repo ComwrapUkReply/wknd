@@ -7,7 +7,18 @@
       "Bash(grep -r sling:resourceType /Users/Szymon/DEV/github/aem-guides-wknd/ui.apps/src/main/content/jcr_root/apps/wknd/components/*/.content.xml)",
       "Read(//Users/Szymon/DEV/github/aem-guides-wknd/**)",
       "Bash(xargs basename:*)",
-      "Bash(wc -l /Users/Szymon/DEV/github/aem-guides-wknd/core/src/main/java/com/adobe/aem/guides/wknd/core/seo/ai/impl/*.java)"
+      "Bash(wc -l /Users/Szymon/DEV/github/aem-guides-wknd/core/src/main/java/com/adobe/aem/guides/wknd/core/seo/ai/impl/*.java)",
+      "Bash(find /Users/Szymon/DEV/github/aem-guides-wknd -name org.apache.sling.jcr.repoinit*)",
+      "Bash(grep -r \"Sling-Bundle-Resources\\\\|sling.resource\\\\|tools\" /Users/Szymon/DEV/github/aem-guides-wknd/ui.apps/src/main/content/jcr_root/apps/wknd/ --include=*.xml -l)",
+      "Bash(find /Users/Szymon/DEV/github/aem-guides-wknd -path */apps/wknd/tools*)",
+      "Bash(find /Users/Szymon/DEV/github/aem-guides-wknd -path */apps/granite/tools* -name *.xml)",
+      "Bash(find /Users/Szymon/DEV/github/aem-guides-wknd -name filter.xml -path */ui.apps.structure/*)",
+      "Bash(xargs cat:*)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(mvn -pl core compile --no-transfer-progress -Denforcer.skip=true)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

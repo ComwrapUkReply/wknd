@@ -25,6 +25,7 @@
     const CONFIG = Object.freeze({
         endpoint: '/bin/wknd/seo/generate',
         articleTypes: ['Article', 'NewsArticle', 'BlogPosting'],
+        orgTypes: ['Organization'],
         selectors: {
             root:        '.wknd-seo-dialog',
             button:      '.wknd-seo-generate',
@@ -33,6 +34,7 @@
             authorPrompt:'[name="./seo/aiPrompt"]',
             provider:    '[name="./seo/aiProvider"]',
             articleGroup: '.wknd-seo-article-fields',
+            orgGroup:     '.wknd-seo-org-fields',
             seoHeadline:    '[name="./seo/headline"]',
             seoDescription: '[name="./seo/description"]',
             pageTitle:       '[name="./jcr:title"]',
@@ -83,12 +85,11 @@
         return ($el.val() || '').toString();
     }
 
-    /** Toggle the article-specific field group based on selected @type. */
-    function toggleArticleFields($root) {
+    /** Toggle a conditional field group based on whether selectedType is in typeList. */
+    function toggleFieldGroup($root, groupSelector, typeList) {
         const selectedType = readField($root, CONFIG.selectors.schemaType);
-        const show = CONFIG.articleTypes.indexOf(selectedType) !== -1;
-        const $groups = $root.find(CONFIG.selectors.articleGroup);
-        $groups.each(function eachGroup() {
+        const show = typeList.indexOf(selectedType) !== -1;
+        $root.find(groupSelector).each(function eachGroup() {
             const $group = $(this);
             if (show) {
                 $group.show();
@@ -98,6 +99,16 @@
                 $group.find(':input').prop('disabled', true);
             }
         });
+    }
+
+    /** Toggle the article-specific field group based on selected @type. */
+    function toggleArticleFields($root) {
+        toggleFieldGroup($root, CONFIG.selectors.articleGroup, CONFIG.articleTypes);
+    }
+
+    /** Toggle the organization-specific field group based on selected @type. */
+    function toggleOrgFields($root) {
+        toggleFieldGroup($root, CONFIG.selectors.orgGroup, CONFIG.orgTypes);
     }
 
     /**
@@ -227,14 +238,16 @@
             const $buttons = $root.find(CONFIG.selectors.button);
             const $type = $root.find(CONFIG.selectors.schemaType).first();
 
-            // Initial state and reactive updates for conditional article fields.
+            // Initial state for conditional field groups.
             toggleArticleFields($root);
+            toggleOrgFields($root);
 
             // Pre-populate headline/description from Basic tab if currently blank.
             prefillFromPageBasic($root);
 
             $type.off('change.wkndSeoType').on('change.wkndSeoType', function onTypeChange() {
                 toggleArticleFields($root);
+                toggleOrgFields($root);
             });
 
             $buttons.off(CONFIG.events.click).on(CONFIG.events.click, function onClick(e) {

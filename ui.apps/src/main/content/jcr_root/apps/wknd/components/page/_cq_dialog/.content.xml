@@ -6,7 +6,7 @@
       core/wcm/components/page/v3/page/cq:dialog
     via the page component's sling:resourceSuperType. The Sling Resource
     Merger deep-merges this fragment into the core Page Properties dialog,
-    so we only declare the *delta*: a new "Schema.org" tab, ordered
+    so we only declare the *delta*: a new "Structured Data" tab, ordered
     right after the "Basic" tab.
 
     Actual fields live in the reusable fragment:
@@ -34,10 +34,10 @@
                 <items
                     jcr:primaryType="nt:unstructured"
                     sling:resourceMerge="{Boolean}true">
-                    <!-- Schema.org tab - container wraps the reusable fragment -->
+                    <!-- Structured Data tab - container wraps the reusable fragment -->
                     <seo
                         jcr:primaryType="nt:unstructured"
-                        jcr:title="Schema.org"
+                        jcr:title="Structured Data"
                         sling:resourceType="granite/ui/components/coral/foundation/container"
                         sling:orderBefore="advanced">
                         <items jcr:primaryType="nt:unstructured">

@@ -74,20 +74,32 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
     private static final String PN_IMAGE          = "image";
     private static final String PN_KEYWORDS       = "keywords";
     private static final String PN_JSON_LD        = "jsonLd";
-    private static final String PN_ARTICLE_SECTION = "articleSection";
-    private static final String PN_WORD_COUNT      = "wordCount";
-    private static final String PN_PUBLISHER_NAME  = "publisherName";
-    private static final String PN_PUBLISHER_LOGO  = "publisherLogo";
-    private static final String PN_AUTHOR_TYPE     = "authorType";
-    private static final String PN_AUTHOR_URL      = "authorUrl";
+    private static final String PN_ARTICLE_SECTION   = "articleSection";
+    private static final String PN_WORD_COUNT        = "wordCount";
+    private static final String PN_PUBLISHER_NAME    = "publisherName";
+    private static final String PN_PUBLISHER_LOGO    = "publisherLogo";
+    private static final String PN_AUTHOR_TYPE       = "authorType";
+    private static final String PN_AUTHOR_URL        = "authorUrl";
+    private static final String PN_ORG_LEGAL_NAME    = "orgLegalName";
+    private static final String PN_ORG_LOGO          = "orgLogo";
+    private static final String PN_ORG_TELEPHONE     = "orgTelephone";
+    private static final String PN_ORG_EMAIL         = "orgEmail";
+    private static final String PN_ORG_SAME_AS       = "orgSameAs";
+    private static final String PN_ORG_FOUNDING_DATE = "orgFoundingDate";
+    private static final String PN_ORG_STREET        = "orgStreetAddress";
+    private static final String PN_ORG_LOCALITY      = "orgAddressLocality";
+    private static final String PN_ORG_REGION        = "orgAddressRegion";
+    private static final String PN_ORG_POSTAL_CODE   = "orgPostalCode";
+    private static final String PN_ORG_COUNTRY       = "orgAddressCountry";
 
-    private static final String MODE_DISABLE  = "disable";
-    private static final String MODE_OVERRIDE = "override";
-    private static final String DEFAULT_TYPE  = "WebPage";
-    private static final String SCHEMA_CONTEXT = "https://schema.org";
-    private static final String TYPE_ARTICLE = "Article";
-    private static final String TYPE_NEWS_ARTICLE = "NewsArticle";
-    private static final String TYPE_BLOG_POSTING = "BlogPosting";
+    private static final String MODE_DISABLE    = "disable";
+    private static final String MODE_OVERRIDE   = "override";
+    private static final String DEFAULT_TYPE    = "WebPage";
+    private static final String SCHEMA_CONTEXT  = "https://schema.org";
+    private static final String TYPE_ARTICLE      = "Article";
+    private static final String TYPE_NEWS_ARTICLE  = "NewsArticle";
+    private static final String TYPE_BLOG_POSTING  = "BlogPosting";
+    private static final String TYPE_ORGANIZATION  = "Organization";
 
     // ---- Injections -------------------------------------------------------
 
@@ -298,6 +310,10 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
             }
         }
 
+        if (isOrganizationType(type)) {
+            addOrganizationFields(b, page, override ? null : policy);
+        }
+
         return b.build();
     }
 
@@ -357,6 +373,51 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
 
     private boolean isArticleLikeType(final String type) {
         return TYPE_ARTICLE.equals(type) || TYPE_NEWS_ARTICLE.equals(type) || TYPE_BLOG_POSTING.equals(type);
+    }
+
+    private boolean isOrganizationType(final String type) {
+        return TYPE_ORGANIZATION.equals(type);
+    }
+
+    private void addOrganizationFields(final JsonObjectBuilder b, final ValueMap page, final ValueMap policy) {
+        final String legalName    = pickString(page, policy, PN_ORG_LEGAL_NAME);
+        final String logo         = pickString(page, policy, PN_ORG_LOGO);
+        final String telephone    = pickString(page, policy, PN_ORG_TELEPHONE);
+        final String email        = pickString(page, policy, PN_ORG_EMAIL);
+        final String foundingDate = pickString(page, policy, PN_ORG_FOUNDING_DATE);
+        final List<String> sameAs = pickList(page, policy, PN_ORG_SAME_AS);
+        final String street       = pickString(page, policy, PN_ORG_STREET);
+        final String locality     = pickString(page, policy, PN_ORG_LOCALITY);
+        final String region       = pickString(page, policy, PN_ORG_REGION);
+        final String postalCode   = pickString(page, policy, PN_ORG_POSTAL_CODE);
+        final String country      = pickString(page, policy, PN_ORG_COUNTRY);
+
+        if (StringUtils.isNotBlank(legalName))    { b.add("legalName", legalName); }
+        if (StringUtils.isNotBlank(logo)) {
+            b.add("logo", Json.createObjectBuilder()
+                    .add("@type", "ImageObject")
+                    .add("url", logo));
+        }
+        if (StringUtils.isNotBlank(telephone))    { b.add("telephone", telephone); }
+        if (StringUtils.isNotBlank(email))        { b.add("email", email); }
+        if (StringUtils.isNotBlank(foundingDate)) { b.add("foundingDate", foundingDate); }
+        if (!sameAs.isEmpty()) {
+            final JsonArrayBuilder arr = Json.createArrayBuilder();
+            sameAs.forEach(arr::add);
+            b.add("sameAs", arr);
+        }
+        final boolean hasAddress = StringUtils.isNotBlank(street) || StringUtils.isNotBlank(locality)
+                || StringUtils.isNotBlank(region) || StringUtils.isNotBlank(postalCode)
+                || StringUtils.isNotBlank(country);
+        if (hasAddress) {
+            final JsonObjectBuilder addr = Json.createObjectBuilder().add("@type", "PostalAddress");
+            if (StringUtils.isNotBlank(street))     { addr.add("streetAddress", street); }
+            if (StringUtils.isNotBlank(locality))   { addr.add("addressLocality", locality); }
+            if (StringUtils.isNotBlank(region))     { addr.add("addressRegion", region); }
+            if (StringUtils.isNotBlank(postalCode)) { addr.add("postalCode", postalCode); }
+            if (StringUtils.isNotBlank(country))    { addr.add("addressCountry", country); }
+            b.add("address", addr);
+        }
     }
 
     private String sanitizeAuthorType(final String authorType) {

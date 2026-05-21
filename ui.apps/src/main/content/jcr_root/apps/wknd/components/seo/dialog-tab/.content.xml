@@ -88,19 +88,19 @@
                             name="./seo/type"
                             emptyText="Select a type">
                             <items jcr:primaryType="nt:unstructured">
-                                <webpage jcr:primaryType="nt:unstructured" text="WebPage"       value="WebPage" selected="{Boolean}true"/>
-                                <article jcr:primaryType="nt:unstructured" text="Article"       value="Article"/>
-                                <newsArt jcr:primaryType="nt:unstructured" text="NewsArticle"   value="NewsArticle"/>
-                                <blog    jcr:primaryType="nt:unstructured" text="BlogPosting"   value="BlogPosting"/>
-                                <product jcr:primaryType="nt:unstructured" text="Product"       value="Product"/>
-                                <event   jcr:primaryType="nt:unstructured" text="Event"         value="Event"/>
-                                <faq     jcr:primaryType="nt:unstructured" text="FAQPage"       value="FAQPage"/>
-                                <howto   jcr:primaryType="nt:unstructured" text="HowTo"         value="HowTo"/>
-                                <org     jcr:primaryType="nt:unstructured" text="Organization"  value="Organization"/>
-                                <person  jcr:primaryType="nt:unstructured" text="Person"        value="Person"/>
-                                <place   jcr:primaryType="nt:unstructured" text="Place"         value="Place"/>
-                                <recipe  jcr:primaryType="nt:unstructured" text="Recipe"        value="Recipe"/>
-                                <video   jcr:primaryType="nt:unstructured" text="VideoObject"   value="VideoObject"/>
+                                <webpage    jcr:primaryType="nt:unstructured" text="WebPage"       value="WebPage" selected="{Boolean}true"/>
+                                <org        jcr:primaryType="nt:unstructured" text="Organization"  value="Organization"/>
+                                <article    jcr:primaryType="nt:unstructured" text="Article"       value="Article"/>
+                                <newsArt    jcr:primaryType="nt:unstructured" text="NewsArticle"   value="NewsArticle"/>
+                                <blog       jcr:primaryType="nt:unstructured" text="BlogPosting"   value="BlogPosting"/>
+                                <product    jcr:primaryType="nt:unstructured" text="Product"       value="Product"/>
+                                <event      jcr:primaryType="nt:unstructured" text="Event"         value="Event"/>
+                                <faq        jcr:primaryType="nt:unstructured" text="FAQPage"       value="FAQPage"/>
+                                <howto      jcr:primaryType="nt:unstructured" text="HowTo"         value="HowTo"/>
+                                <person     jcr:primaryType="nt:unstructured" text="Person"        value="Person"/>
+                                <place      jcr:primaryType="nt:unstructured" text="Place"         value="Place"/>
+                                <recipe     jcr:primaryType="nt:unstructured" text="Recipe"        value="Recipe"/>
+                                <video      jcr:primaryType="nt:unstructured" text="VideoObject"   value="VideoObject"/>
                                 <breadcrumb jcr:primaryType="nt:unstructured" text="BreadcrumbList" value="BreadcrumbList"/>
                             </items>
                         </type>
@@ -180,6 +180,112 @@
                                     name="./seo/authorUrl"/>
                             </items>
                         </articleFields>
+
+                        <!-- Organization-specific fields (Organization only) -->
+                        <organizationFields
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/well"
+                            granite:class="wknd-seo-org-fields"
+                            data-show-for-types="Organization">
+                            <items jcr:primaryType="nt:unstructured">
+                                <orgHeading
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/heading"
+                                    level="{Long}4"
+                                    text="Organization-specific properties"/>
+                                <orgHelp
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                    text="These fields apply only to the Organization type and are used by Google's Knowledge Panel."/>
+
+                                <orgLegalName
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    fieldLabel="Legal Name"
+                                    fieldDescription="schema:legalName — official registered name if different from display name."
+                                    name="./seo/orgLegalName"/>
+
+                                <orgLogo
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                    fieldLabel="Logo"
+                                    fieldDescription="schema:logo — DAM path or absolute URL. Recommended: 112×112 px minimum."
+                                    name="./seo/orgLogo"
+                                    rootPath="/content/dam"/>
+
+                                <orgTelephone
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    fieldLabel="Telephone"
+                                    fieldDescription="schema:telephone — include country code, e.g. +1-800-555-1212."
+                                    name="./seo/orgTelephone"/>
+
+                                <orgEmail
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    fieldLabel="Email"
+                                    fieldDescription="schema:email — public contact email address."
+                                    name="./seo/orgEmail"/>
+
+                                <orgSameAs
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                    fieldLabel="sameAs URLs"
+                                    fieldDescription="schema:sameAs — links to official social profiles (LinkedIn, Twitter, Wikipedia, etc.).">
+                                    <field
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                        name="./seo/orgSameAs"/>
+                                </orgSameAs>
+
+                                <orgFoundingDate
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/datepicker"
+                                    fieldLabel="Founding Date"
+                                    fieldDescription="schema:foundingDate."
+                                    name="./seo/orgFoundingDate"
+                                    type="date"
+                                    displayedFormat="YYYY-MM-DD"
+                                    valueFormat="YYYY-MM-DD"/>
+
+                                <orgAddressHeading
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/heading"
+                                    level="{Long}5"
+                                    text="Postal Address (schema:address)"/>
+
+                                <orgStreetAddress
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    fieldLabel="Street Address"
+                                    name="./seo/orgStreetAddress"/>
+
+                                <orgAddressLocality
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    fieldLabel="City"
+                                    name="./seo/orgAddressLocality"/>
+
+                                <orgAddressRegion
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    fieldLabel="State / Region"
+                                    name="./seo/orgAddressRegion"/>
+
+                                <orgPostalCode
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    fieldLabel="Postal Code"
+                                    name="./seo/orgPostalCode"/>
+
+                                <orgAddressCountry
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    fieldLabel="Country Code"
+                                    fieldDescription="ISO 3166-1 alpha-2, e.g. US, GB, DE."
+                                    name="./seo/orgAddressCountry"/>
+                            </items>
+                        </organizationFields>
 
                         <!-- Common descriptive fields -->
                         <headline

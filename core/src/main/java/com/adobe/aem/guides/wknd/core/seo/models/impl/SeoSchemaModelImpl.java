@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -40,6 +41,8 @@ import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.day.cq.tagging.Tag;
+import com.day.cq.tagging.TagManager;
 import com.day.cq.wcm.api.policies.ContentPolicy;
 import com.day.cq.wcm.api.policies.ContentPolicyManager;
 import com.adobe.aem.guides.wknd.core.seo.models.SeoSchemaModel;
@@ -91,6 +94,12 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
     private static final String PN_ORG_REGION        = "orgAddressRegion";
     private static final String PN_ORG_POSTAL_CODE   = "orgPostalCode";
     private static final String PN_ORG_COUNTRY       = "orgAddressCountry";
+
+    private static final String PN_CQ_LAST_MODIFIED      = "cq:lastModified";
+    private static final String PN_CQ_LAST_REPLICATED    = "cq:lastReplicated";
+    private static final String PN_CQ_REPLICATION_ACTION = "cq:lastReplicationAction";
+    private static final String PN_CQ_TAGS               = "cq:tags";
+    private static final String REPLICATION_ACTIVATE     = "Activate";
 
     private static final String MODE_DISABLE    = "disable";
     private static final String MODE_OVERRIDE   = "override";
@@ -239,8 +248,10 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
         final String description = StringUtils.defaultIfBlank(pickString(page, override ? null : policy, PN_DESCRIPTION), pageDescription());
         final String author      = pickString(page, override ? null : policy, PN_AUTHOR);
         final String image       = pickString(page, override ? null : policy, PN_IMAGE);
-        final String datePub     = pickDate(page, override ? null : policy, PN_DATE_PUBLISHED);
-        final String dateMod     = pickDate(page, override ? null : policy, PN_DATE_MODIFIED);
+        final String datePub     = StringUtils.defaultIfBlank(
+                pickDate(page, override ? null : policy, PN_DATE_PUBLISHED), replicationDate());
+        final String dateMod     = StringUtils.defaultIfBlank(
+                pickDate(page, override ? null : policy, PN_DATE_MODIFIED), pageLastModified());
         final String articleSection = pickString(page, override ? null : policy, PN_ARTICLE_SECTION);
         final String publisherName  = pickString(page, override ? null : policy, PN_PUBLISHER_NAME);
         final String publisherLogo  = pickString(page, override ? null : policy, PN_PUBLISHER_LOGO);
@@ -248,10 +259,14 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
                 pickString(page, override ? null : policy, PN_AUTHOR_TYPE), "Person");
         final String authorUrl      = pickString(page, override ? null : policy, PN_AUTHOR_URL);
         final Long wordCount        = pickLong(page, override ? null : policy, PN_WORD_COUNT);
-        final List<String> keywords = pickList(page, override ? null : policy, PN_KEYWORDS);
+        final List<String> tagTitles = pageTags();
+        List<String> keywords = pickList(page, override ? null : policy, PN_KEYWORDS);
+        if (keywords.isEmpty()) { keywords = tagTitles; }
 
         if (StringUtils.isBlank(headline) && StringUtils.isBlank(description)
-                && StringUtils.isBlank(author) && keywords.isEmpty()) {
+                && StringUtils.isBlank(author) && keywords.isEmpty()
+                && StringUtils.isBlank(datePub) && StringUtils.isBlank(dateMod)
+                && tagTitles.isEmpty()) {
             return null;
         }
 
@@ -261,8 +276,16 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
 
         final String url = canonicalUrl();
         if (StringUtils.isNotBlank(url)) {
+            b.add("@id", url);
             b.add("url", url);
             b.add("mainEntityOfPage", Json.createObjectBuilder().add("@id", url));
+        }
+        final String uuid = pageUuid();
+        if (StringUtils.isNotBlank(uuid)) {
+            b.add("identifier", Json.createObjectBuilder()
+                    .add("@type", "PropertyValue")
+                    .add("name", "jcr:uuid")
+                    .add("value", uuid));
         }
         if (StringUtils.isNotBlank(headline))    { b.add("headline", headline); b.add("name", headline); }
         if (StringUtils.isNotBlank(description)) { b.add("description", description); }
@@ -286,6 +309,12 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
             final JsonArrayBuilder kw = Json.createArrayBuilder();
             keywords.forEach(kw::add);
             b.add("keywords", kw);
+        }
+        if (!tagTitles.isEmpty()) {
+            final JsonArrayBuilder aboutArr = Json.createArrayBuilder();
+            tagTitles.forEach(t -> aboutArr.add(
+                    Json.createObjectBuilder().add("@type", "Thing").add("name", t)));
+            b.add("about", aboutArr);
         }
         final String lang = pageLanguage();
         if (StringUtils.isNotBlank(lang)) { b.add("inLanguage", lang); }
@@ -437,14 +466,74 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
     }
 
     private String pageLanguage() {
-        if (currentPage == null || currentPage.getLanguage(false) == null) { return null; }
-        return currentPage.getLanguage(false).toLanguageTag();
+        if (currentPage == null) { return null; }
+        try {
+            final java.util.Locale locale = currentPage.getLanguage(false);
+            return (locale != null) ? locale.toLanguageTag() : null;
+        } catch (final Throwable t) {
+            // ICU4J (used by Page.getLanguage) may be absent in restricted environments.
+            LOG.debug("Cannot determine page language: {}", t.getMessage());
+            return null;
+        }
     }
 
     private String canonicalUrl() {
         if (currentPage == null) { return null; }
         final String vanity = currentPage.getVanityUrl();
         return StringUtils.isNotBlank(vanity) ? vanity : currentPage.getPath() + ".html";
+    }
+
+    private ValueMap pageContentProps() {
+        if (currentPage == null) { return emptyMap(); }
+        final Resource content = currentPage.getContentResource();
+        return (content != null) ? content.getValueMap() : emptyMap();
+    }
+
+    private String formatCalendar(final java.util.Calendar cal) {
+        if (cal == null) { return null; }
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX").format(cal.getTime());
+    }
+
+    private String pageLastModified() {
+        return formatCalendar(pageContentProps().get(PN_CQ_LAST_MODIFIED, java.util.Calendar.class));
+    }
+
+    private String replicationDate() {
+        final ValueMap props = pageContentProps();
+        if (!REPLICATION_ACTIVATE.equals(props.get(PN_CQ_REPLICATION_ACTION, String.class))) {
+            return null;
+        }
+        return formatCalendar(props.get(PN_CQ_LAST_REPLICATED, java.util.Calendar.class));
+    }
+
+    private String pageUuid() {
+        return pageContentProps().get("jcr:uuid", String.class);
+    }
+
+    private List<String> pageTags() {
+        final String[] tagIds = pageContentProps().get(PN_CQ_TAGS, String[].class);
+        if (tagIds == null || tagIds.length == 0) { return Collections.emptyList(); }
+        final TagManager tm = (request != null)
+                ? request.getResourceResolver().adaptTo(TagManager.class) : null;
+        if (tm == null) { return Collections.emptyList(); }
+        Locale locale = Locale.ENGLISH;
+        if (currentPage != null) {
+            try {
+                final Locale pageLocale = currentPage.getLanguage(false);
+                if (pageLocale != null) { locale = pageLocale; }
+            } catch (final Throwable t) {
+                LOG.debug("Cannot determine page language for tags: {}", t.getMessage());
+            }
+        }
+        final List<String> titles = new ArrayList<>();
+        for (final String tagId : tagIds) {
+            final Tag tag = tm.resolve(tagId);
+            if (tag != null) {
+                final String title = StringUtils.defaultIfBlank(tag.getTitle(locale), tag.getTitle());
+                if (StringUtils.isNotBlank(title)) { titles.add(title); }
+            }
+        }
+        return Collections.unmodifiableList(titles);
     }
 
     // ---- Rendering helpers ------------------------------------------------

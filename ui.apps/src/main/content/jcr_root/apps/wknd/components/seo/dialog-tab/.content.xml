@@ -287,6 +287,62 @@
                             </items>
                         </organizationFields>
 
+                        <!-- Multi-schema auto-injection overrides -->
+                        <multiSchemaFields
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/well">
+                            <items jcr:primaryType="nt:unstructured">
+                                <multiSchemaHeading
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/heading"
+                                    level="{Long}4"
+                                    text="Auto-injected schemas"/>
+                                <multiSchemaHelp
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                    text="These schemas are auto-generated from global OSGi config and merged into the @graph alongside the primary schema. Use 'Inherit' to follow the site-wide default."/>
+
+                                <includeOrganization
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                    fieldLabel="Organization schema"
+                                    fieldDescription="Auto-injects an Organization node (name, logo, sameAs) from the WKND SEO Global Site Config."
+                                    name="./seo/includeOrganization">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <inherit  jcr:primaryType="nt:unstructured" text="Inherit from global config (default)" value="" selected="{Boolean}true"/>
+                                        <include  jcr:primaryType="nt:unstructured" text="Include on this page" value="yes"/>
+                                        <exclude  jcr:primaryType="nt:unstructured" text="Exclude from this page" value="no"/>
+                                    </items>
+                                </includeOrganization>
+
+                                <includeBreadcrumb
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                    fieldLabel="BreadcrumbList schema"
+                                    fieldDescription="Auto-injects a BreadcrumbList derived from the AEM page hierarchy."
+                                    name="./seo/includeBreadcrumb">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <inherit  jcr:primaryType="nt:unstructured" text="Inherit from global config (default)" value="" selected="{Boolean}true"/>
+                                        <include  jcr:primaryType="nt:unstructured" text="Include on this page" value="yes"/>
+                                        <exclude  jcr:primaryType="nt:unstructured" text="Exclude from this page" value="no"/>
+                                    </items>
+                                </includeBreadcrumb>
+
+                                <includeWebSite
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                    fieldLabel="WebSite schema"
+                                    fieldDescription="Auto-injects a WebSite node (enables Google Sitelinks Searchbox when a search URL template is configured)."
+                                    name="./seo/includeWebSite">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <inherit  jcr:primaryType="nt:unstructured" text="Inherit from global config (default)" value="" selected="{Boolean}true"/>
+                                        <include  jcr:primaryType="nt:unstructured" text="Include on this page" value="yes"/>
+                                        <exclude  jcr:primaryType="nt:unstructured" text="Exclude from this page" value="no"/>
+                                    </items>
+                                </includeWebSite>
+                            </items>
+                        </multiSchemaFields>
+
                         <!-- Common descriptive fields -->
                         <headline
                             jcr:primaryType="nt:unstructured"

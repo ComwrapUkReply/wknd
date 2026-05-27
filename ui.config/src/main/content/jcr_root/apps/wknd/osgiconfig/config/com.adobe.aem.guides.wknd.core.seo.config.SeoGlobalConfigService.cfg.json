@@ -1,0 +1,10 @@
+{
+  "organizationName": "WKND",
+  "organizationUrl": "https://www.wknd.site",
+  "logoPath": "/content/dam/wknd/en/logos/wknd-logo.png",
+  "sameAs": [],
+  "includeOrganization": true,
+  "includeBreadcrumb": true,
+  "includeWebSite": true,
+  "searchUrlTemplate": ""
+}

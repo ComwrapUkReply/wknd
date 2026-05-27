@@ -36,16 +36,19 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.ScriptVariable;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adobe.aem.guides.wknd.core.seo.config.SeoGlobalConfigService;
+import com.adobe.aem.guides.wknd.core.seo.models.SeoSchemaModel;
 import com.day.cq.tagging.Tag;
 import com.day.cq.tagging.TagManager;
+import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.policies.ContentPolicy;
 import com.day.cq.wcm.api.policies.ContentPolicyManager;
-import com.adobe.aem.guides.wknd.core.seo.models.SeoSchemaModel;
 
 /**
  * Merges template (policy) defaults with page-level Schema.org properties
@@ -54,6 +57,15 @@ import com.adobe.aem.guides.wknd.core.seo.models.SeoSchemaModel;
  * Precedence per field: page value → template default.
  * When the author pastes raw JSON-LD (./seo/jsonLd) it is trusted and
  * emitted verbatim (after safety sanitization).
+ *
+ * In addition to the author-configured primary schema, three auto-schemas
+ * are injected (controlled by {@link SeoGlobalConfigService} and per-page toggles):
+ *   - Organization  — from OSGi config
+ *   - BreadcrumbList — derived from the AEM page hierarchy
+ *   - WebSite        — from OSGi config, with optional SearchAction
+ *
+ * When more than one schema node is present the output is wrapped in a
+ * single {@code @graph} array inside one {@code <script type="application/ld+json">}.
  */
 @Model(
         adaptables = SlingHttpServletRequest.class,
@@ -95,6 +107,15 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
     private static final String PN_ORG_POSTAL_CODE   = "orgPostalCode";
     private static final String PN_ORG_COUNTRY       = "orgAddressCountry";
 
+    // Per-page multi-schema override toggles (stored under ./seo/)
+    private static final String PN_INCLUDE_ORGANIZATION = "includeOrganization";
+    private static final String PN_INCLUDE_BREADCRUMB   = "includeBreadcrumb";
+    private static final String PN_INCLUDE_WEBSITE      = "includeWebSite";
+
+    // Toggle values
+    private static final String TOGGLE_YES = "yes";
+    private static final String TOGGLE_NO  = "no";
+
     private static final String PN_CQ_LAST_MODIFIED      = "cq:lastModified";
     private static final String PN_CQ_LAST_REPLICATED    = "cq:lastReplicated";
     private static final String PN_CQ_REPLICATION_ACTION = "cq:lastReplicationAction";
@@ -116,7 +137,10 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
     private SlingHttpServletRequest request;
 
     @ScriptVariable
-    private com.day.cq.wcm.api.Page currentPage;
+    private Page currentPage;
+
+    @OSGiService
+    private SeoGlobalConfigService globalConfig;
 
     // ---- Derived state ----------------------------------------------------
 
@@ -194,22 +218,49 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
         final boolean override = MODE_OVERRIDE.equalsIgnoreCase(mode);
         final Map<String, JsonObject> graph = new LinkedHashMap<>();
 
+        // 1. Resolve the primary schema (raw JSON-LD or built from fields)
         addRaw(graph, policy.get(PN_JSON_LD, String.class), "policy");
-        if (!override) {
-            // page raw overrides policy raw
-        } else {
-            graph.clear();
-        }
+        if (override) { graph.clear(); }
         addRaw(graph, page.get(PN_JSON_LD, String.class), "page");
 
         if (graph.isEmpty()) {
             final JsonObject built = buildFromFields(page, policy, override);
-            return (built != null) ? pretty(built) : "";
+            if (built == null) { return ""; }
+            graph.put("primary", built);
         }
+
+        // 2. Add auto-schemas when the global service is available
+        if (globalConfig != null) {
+            if (shouldInclude(page, PN_INCLUDE_ORGANIZATION, globalConfig.includeOrganization())) {
+                final JsonObject org = buildOrganizationSchema();
+                if (org != null) { graph.put("auto:org", org); }
+            }
+            if (shouldInclude(page, PN_INCLUDE_BREADCRUMB, globalConfig.includeBreadcrumb())) {
+                final JsonObject bc = buildBreadcrumbSchema();
+                if (bc != null) { graph.put("auto:breadcrumb", bc); }
+            }
+            if (shouldInclude(page, PN_INCLUDE_WEBSITE, globalConfig.includeWebSite())) {
+                final JsonObject ws = buildWebSiteSchema();
+                if (ws != null) { graph.put("auto:website", ws); }
+            }
+        }
+
+        // 3. Single node → output without @graph wrapper; multiple → wrap
         if (graph.size() == 1) {
             return pretty(graph.values().iterator().next());
         }
         return pretty(wrapGraph(graph.values()));
+    }
+
+    /**
+     * Returns true when this auto-schema should be included on the current page.
+     * Page toggle ("yes"/"no") takes precedence over the global OSGi default.
+     */
+    private boolean shouldInclude(final ValueMap page, final String key, final boolean globalDefault) {
+        final String pageVal = page.get(key, String.class);
+        if (TOGGLE_YES.equals(pageVal)) { return true; }
+        if (TOGGLE_NO.equals(pageVal))  { return false; }
+        return globalDefault;
     }
 
     private void addRaw(final Map<String, JsonObject> graph, final String raw, final String origin) {
@@ -241,6 +292,113 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
                 .add("@graph", arr)
                 .build();
     }
+
+    // ---- Auto-schema builders ---------------------------------------------
+
+    /**
+     * Builds an Organization node from the OSGi global config.
+     * Returns null when organizationName is blank (nothing useful to emit).
+     */
+    private JsonObject buildOrganizationSchema() {
+        final String name = globalConfig.organizationName();
+        if (StringUtils.isBlank(name)) { return null; }
+
+        final JsonObjectBuilder b = Json.createObjectBuilder()
+                .add("@type", "Organization")
+                .add("name", name);
+
+        final String url = globalConfig.organizationUrl();
+        if (StringUtils.isNotBlank(url)) {
+            b.add("@id", url + "#organization");
+            b.add("url", url);
+        }
+        final String logo = globalConfig.logoPath();
+        if (StringUtils.isNotBlank(logo)) {
+            b.add("logo", Json.createObjectBuilder()
+                    .add("@type", "ImageObject")
+                    .add("url", logo));
+        }
+        final String[] sameAs = globalConfig.sameAs();
+        if (sameAs != null && sameAs.length > 0) {
+            final JsonArrayBuilder arr = Json.createArrayBuilder();
+            for (final String s : sameAs) {
+                if (StringUtils.isNotBlank(s)) { arr.add(s); }
+            }
+            b.add("sameAs", arr);
+        }
+        return b.build();
+    }
+
+    /**
+     * Builds a BreadcrumbList by walking the AEM page hierarchy from the site
+     * root (depth 2, i.e. one level below /content) to the current page.
+     * Returns null for top-level pages that have no meaningful breadcrumb.
+     */
+    private JsonObject buildBreadcrumbSchema() {
+        if (currentPage == null) { return null; }
+
+        final List<Page> crumbs = new ArrayList<>();
+        Page p = currentPage;
+        // Walk up; stop when we've reached depth 1 (the /content node itself)
+        while (p != null && p.getDepth() > 1) {
+            crumbs.add(0, p);
+            p = p.getParent();
+        }
+        if (crumbs.size() < 2) { return null; }
+
+        final JsonArrayBuilder items = Json.createArrayBuilder();
+        int position = 1;
+        for (final Page crumb : crumbs) {
+            final String name = StringUtils.defaultIfBlank(crumb.getNavigationTitle(),
+                    StringUtils.defaultIfBlank(crumb.getTitle(), crumb.getName()));
+            final String url = crumb.getPath() + ".html";
+            items.add(Json.createObjectBuilder()
+                    .add("@type", "ListItem")
+                    .add("position", position++)
+                    .add("name", name)
+                    .add("item", url));
+        }
+
+        return Json.createObjectBuilder()
+                .add("@type", "BreadcrumbList")
+                .add("itemListElement", items)
+                .build();
+    }
+
+    /**
+     * Builds a WebSite node from the OSGi global config.
+     * Optionally includes a SearchAction if searchUrlTemplate is configured.
+     * Returns null when no URL can be determined.
+     */
+    private JsonObject buildWebSiteSchema() {
+        final String url = StringUtils.defaultIfBlank(
+                globalConfig.organizationUrl(),
+                currentPage != null ? currentPage.getPath() + ".html" : "");
+        if (StringUtils.isBlank(url)) { return null; }
+
+        final JsonObjectBuilder b = Json.createObjectBuilder()
+                .add("@type", "WebSite")
+                .add("@id", url + "#website")
+                .add("url", url);
+
+        final String name = globalConfig.organizationName();
+        if (StringUtils.isNotBlank(name)) {
+            b.add("name", name);
+        }
+
+        final String searchTemplate = globalConfig.searchUrlTemplate();
+        if (StringUtils.isNotBlank(searchTemplate)) {
+            b.add("potentialAction", Json.createObjectBuilder()
+                    .add("@type", "SearchAction")
+                    .add("target", Json.createObjectBuilder()
+                            .add("@type", "EntryPoint")
+                            .add("urlTemplate", searchTemplate))
+                    .add("query-input", "required name=search_term_string"));
+        }
+        return b.build();
+    }
+
+    // ---- Field-based primary schema builder -------------------------------
 
     private JsonObject buildFromFields(final ValueMap page, final ValueMap policy, final boolean override) {
         final String type        = StringUtils.defaultIfBlank(pickString(page, override ? null : policy, PN_TYPE), DEFAULT_TYPE);

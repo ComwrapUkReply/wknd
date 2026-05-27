@@ -22,7 +22,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
+import com.adobe.aem.guides.wknd.core.seo.config.SeoGlobalConfigService;
 import com.adobe.aem.guides.wknd.core.seo.models.SeoSchemaModel;
 import com.day.cq.tagging.Tag;
 import com.day.cq.tagging.TagManager;
@@ -33,6 +36,7 @@ import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 
 @ExtendWith({ AemContextExtension.class, MockitoExtension.class })
+@MockitoSettings(strictness = Strictness.LENIENT)
 class SeoSchemaModelImplTest {
 
     private final AemContext ctx = new AemContext();
@@ -41,6 +45,7 @@ class SeoSchemaModelImplTest {
     @Mock private Tag cyclingTag;
     @Mock private Tag summerTag;
     @Mock private ContentPolicyManager contentPolicyManager;
+    @Mock private SeoGlobalConfigService globalConfig;
 
     @BeforeEach
     void setUp() {
@@ -50,6 +55,17 @@ class SeoSchemaModelImplTest {
         when(contentPolicyManager.getPolicy(any(Resource.class))).thenReturn(null);
         ctx.registerAdapter(ResourceResolver.class, ContentPolicyManager.class, contentPolicyManager);
         ctx.registerAdapter(ResourceResolver.class, TagManager.class, tagManager);
+
+        // Default: globalConfig present but all auto-schemas disabled (keeps existing tests clean)
+        ctx.registerService(SeoGlobalConfigService.class, globalConfig);
+        when(globalConfig.includeOrganization()).thenReturn(false);
+        when(globalConfig.includeBreadcrumb()).thenReturn(false);
+        when(globalConfig.includeWebSite()).thenReturn(false);
+        when(globalConfig.organizationName()).thenReturn("");
+        when(globalConfig.organizationUrl()).thenReturn("");
+        when(globalConfig.logoPath()).thenReturn("");
+        when(globalConfig.sameAs()).thenReturn(new String[]{});
+        when(globalConfig.searchUrlTemplate()).thenReturn("");
     }
 
     // ---- helpers ----------------------------------------------------------
@@ -256,5 +272,89 @@ class SeoSchemaModelImplTest {
 
         assertFalse(model.isEnabled());
         assertTrue(model.getJsonLd().isEmpty());
+    }
+
+    // ---- multi-schema @graph output -------------------------------------
+
+    @Test
+    void graph_wrapsMultipleNodes_whenOrganizationEnabled() {
+        when(globalConfig.includeOrganization()).thenReturn(true);
+        when(globalConfig.organizationName()).thenReturn("WKND");
+        when(globalConfig.organizationUrl()).thenReturn("https://www.wknd.site");
+
+        createPage("/content/test", true, "Article");
+
+        SeoSchemaModel model = adapt("/content/test");
+        String json = model.getJsonLd();
+
+        assertTrue(model.isEnabled());
+        assertTrue(json.contains("\"@graph\""),       "@graph wrapper expected");
+        assertTrue(json.contains("\"Article\""),      "primary Article node expected");
+        assertTrue(json.contains("\"Organization\""), "auto-injected Organization node expected");
+        assertTrue(json.contains("\"WKND\""),         "organization name expected");
+    }
+
+    @Test
+    void graph_includesBreadcrumb_whenBreadcrumbEnabled() {
+        when(globalConfig.includeBreadcrumb()).thenReturn(true);
+
+        // Create a two-level hierarchy so a breadcrumb is meaningful
+        ctx.create().page("/content/wknd");
+        createPage("/content/wknd/magazine", true, "Article");
+
+        SeoSchemaModel model = adapt("/content/wknd/magazine");
+        String json = model.getJsonLd();
+
+        assertTrue(json.contains("\"@graph\""),           "@graph expected");
+        assertTrue(json.contains("\"BreadcrumbList\""),   "BreadcrumbList node expected");
+        assertTrue(json.contains("\"ListItem\""),         "ListItem entries expected");
+    }
+
+    @Test
+    void graph_includesWebSite_whenWebSiteEnabled() {
+        when(globalConfig.includeWebSite()).thenReturn(true);
+        when(globalConfig.organizationUrl()).thenReturn("https://www.wknd.site");
+        when(globalConfig.organizationName()).thenReturn("WKND");
+        when(globalConfig.searchUrlTemplate()).thenReturn("https://www.wknd.site/search?q={search_term_string}");
+
+        createPage("/content/test", true, "WebPage");
+
+        SeoSchemaModel model = adapt("/content/test");
+        String json = model.getJsonLd();
+
+        assertTrue(json.contains("\"@graph\""),         "@graph expected");
+        assertTrue(json.contains("\"WebSite\""),         "WebSite node expected");
+        assertTrue(json.contains("\"SearchAction\""),    "SearchAction expected");
+        assertTrue(json.contains("search_term_string"),  "search template expected");
+    }
+
+    @Test
+    void graph_noWrapper_whenAllAutoSchemasDisabledAndSinglePrimary() {
+        // globalConfig has all disabled (setUp default) — output must be a plain object, no @graph
+        createPage("/content/test", true, "WebPage");
+
+        SeoSchemaModel model = adapt("/content/test");
+        String json = model.getJsonLd();
+
+        assertFalse(json.contains("\"@graph\""), "@graph must not appear for a single node");
+        assertTrue(json.contains("\"WebPage\""), "primary WebPage schema expected");
+    }
+
+    @Test
+    void graph_pageToggle_canExcludeOrganizationEvenWhenGlobalEnabled() {
+        when(globalConfig.includeOrganization()).thenReturn(true);
+        when(globalConfig.organizationName()).thenReturn("WKND");
+        when(globalConfig.organizationUrl()).thenReturn("https://www.wknd.site");
+
+        Page page = createPage("/content/test", true, "Article");
+        // Author explicitly suppresses Organization on this page
+        page.getContentResource().getChild("seo").adaptTo(ModifiableValueMap.class)
+                .put("includeOrganization", "no");
+
+        SeoSchemaModel model = adapt("/content/test");
+        String json = model.getJsonLd();
+
+        assertFalse(json.contains("\"Organization\""),
+                "Organization must be suppressed when page toggle is 'no'");
     }
 }

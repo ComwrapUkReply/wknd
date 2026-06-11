@@ -110,6 +110,19 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
     private static final String TYPE_BLOG_POSTING  = "BlogPosting";
     private static final String TYPE_ORGANIZATION  = "Organization";
 
+    // ---- Site-wide Organisation / WebSite constants ----------------------
+    // These describe the brand and never differ between pages or environments.
+    // Update here when the site is rebranded or social profiles change.
+
+    private static final String ORG_NAME  = "WKND";
+    private static final String ORG_URL   = "https://www.wknd.site";
+    private static final String ORG_LOGO  = "/content/dam/wknd/en/logos/wknd-logo.png";
+    private static final String[] ORG_SAME_AS = {
+        // Add authoritative profile URLs as the brand grows, e.g.:
+        // "https://www.linkedin.com/company/wknd",
+        // "https://en.wikipedia.org/wiki/WKND"
+    };
+
     // ---- Injections -------------------------------------------------------
 
     @Self
@@ -194,22 +207,115 @@ public class SeoSchemaModelImpl implements SeoSchemaModel {
         final boolean override = MODE_OVERRIDE.equalsIgnoreCase(mode);
         final Map<String, JsonObject> graph = new LinkedHashMap<>();
 
+        // 1. Resolve the primary schema (raw JSON-LD or built from dialog fields)
         addRaw(graph, policy.get(PN_JSON_LD, String.class), "policy");
-        if (!override) {
-            // page raw overrides policy raw
-        } else {
-            graph.clear();
-        }
+        if (override) { graph.clear(); }
         addRaw(graph, page.get(PN_JSON_LD, String.class), "page");
 
         if (graph.isEmpty()) {
             final JsonObject built = buildFromFields(page, policy, override);
-            return (built != null) ? pretty(built) : "";
+            if (built == null) { return ""; }
+            graph.put("primary", built);
         }
+
+        // 2. Always inject site-wide schemas alongside the primary schema
+        final JsonObject org = buildOrganizationSchema();
+        if (org != null) { graph.put("auto:org", org); }
+
+        final JsonObject bc = buildBreadcrumbSchema();
+        if (bc  != null) { graph.put("auto:breadcrumb", bc); }
+
+        final JsonObject ws = buildWebSiteSchema();
+        if (ws  != null) { graph.put("auto:website", ws); }
+
+        // 3. Single node → output as-is; multiple nodes → wrap in @graph
         if (graph.size() == 1) {
             return pretty(graph.values().iterator().next());
         }
         return pretty(wrapGraph(graph.values()));
+    }
+
+    // ---- Site-wide auto-schema builders -----------------------------------
+
+    /**
+     * Builds a fixed Organization node from the site-wide constants.
+     * Returns null only when ORG_NAME is blank (safety guard).
+     */
+    private JsonObject buildOrganizationSchema() {
+        if (StringUtils.isBlank(ORG_NAME)) { return null; }
+
+        final JsonObjectBuilder b = Json.createObjectBuilder()
+                .add("@type", "Organization")
+                .add("name",  ORG_NAME);
+
+        if (StringUtils.isNotBlank(ORG_URL)) {
+            b.add("@id", ORG_URL + "#organization");
+            b.add("url",  ORG_URL);
+        }
+        if (StringUtils.isNotBlank(ORG_LOGO)) {
+            b.add("logo", Json.createObjectBuilder()
+                    .add("@type", "ImageObject")
+                    .add("url",   ORG_LOGO));
+        }
+        if (ORG_SAME_AS != null && ORG_SAME_AS.length > 0) {
+            final JsonArrayBuilder arr = Json.createArrayBuilder();
+            for (final String s : ORG_SAME_AS) {
+                if (StringUtils.isNotBlank(s)) { arr.add(s); }
+            }
+            b.add("sameAs", arr);
+        }
+        return b.build();
+    }
+
+    /**
+     * Builds a BreadcrumbList by walking the AEM page hierarchy from the
+     * site root (depth 2, one level below /content) to the current page.
+     * Returns null for top-level pages where there is no meaningful trail.
+     */
+    private JsonObject buildBreadcrumbSchema() {
+        if (currentPage == null) { return null; }
+
+        final List<com.day.cq.wcm.api.Page> crumbs = new ArrayList<>();
+        com.day.cq.wcm.api.Page p = currentPage;
+        while (p != null && p.getDepth() > 1) {
+            crumbs.add(0, p);
+            p = p.getParent();
+        }
+        if (crumbs.size() < 2) { return null; }
+
+        final JsonArrayBuilder items = Json.createArrayBuilder();
+        int position = 1;
+        for (final com.day.cq.wcm.api.Page crumb : crumbs) {
+            final String name = StringUtils.defaultIfBlank(crumb.getNavigationTitle(),
+                    StringUtils.defaultIfBlank(crumb.getTitle(), crumb.getName()));
+            items.add(Json.createObjectBuilder()
+                    .add("@type",    "ListItem")
+                    .add("position", position++)
+                    .add("name",     name)
+                    .add("item",     crumb.getPath() + ".html"));
+        }
+        return Json.createObjectBuilder()
+                .add("@type",           "BreadcrumbList")
+                .add("itemListElement", items)
+                .build();
+    }
+
+    /**
+     * Builds a WebSite node from the site-wide constants.
+     * Returns null when ORG_URL is blank.
+     */
+    private JsonObject buildWebSiteSchema() {
+        if (StringUtils.isBlank(ORG_URL)) { return null; }
+
+        final JsonObjectBuilder b = Json.createObjectBuilder()
+                .add("@type", "WebSite")
+                .add("@id",   ORG_URL + "#website")
+                .add("url",   ORG_URL);
+
+        if (StringUtils.isNotBlank(ORG_NAME)) {
+            b.add("name", ORG_NAME);
+        }
+        return b.build();
     }
 
     private void addRaw(final Map<String, JsonObject> graph, final String raw, final String origin) {

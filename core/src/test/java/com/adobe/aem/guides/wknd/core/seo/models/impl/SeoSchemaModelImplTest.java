@@ -257,4 +257,74 @@ class SeoSchemaModelImplTest {
         assertFalse(model.isEnabled());
         assertTrue(model.getJsonLd().isEmpty());
     }
+
+    // ---- multi-schema @graph output -------------------------------------
+
+    @Test
+    void graph_alwaysWrapsInGraph_becauseOrgAndWebSiteAlwaysPresent() {
+        createPage("/content/test", true, "WebPage");
+
+        SeoSchemaModel model = adapt("/content/test");
+        String json = model.getJsonLd();
+
+        assertTrue(model.isEnabled());
+        assertTrue(json.contains("\"@graph\""),
+                "@graph must always be present because Organization + WebSite are always injected");
+    }
+
+    @Test
+    void graph_alwaysIncludesOrganization() {
+        createPage("/content/test", true, "Article");
+
+        String json = adapt("/content/test").getJsonLd();
+
+        assertTrue(json.contains("\"Organization\""), "Organization node must always be present");
+        assertTrue(json.contains("\"WKND\""),          "Organization name constant must appear");
+        assertTrue(json.contains("#organization"),     "Organization @id must be present");
+    }
+
+    @Test
+    void graph_alwaysIncludesWebSite() {
+        createPage("/content/test", true, "WebPage");
+
+        String json = adapt("/content/test").getJsonLd();
+
+        assertTrue(json.contains("\"WebSite\""),   "WebSite node must always be present");
+        assertTrue(json.contains("#website"),      "WebSite @id must be present");
+        assertTrue(json.contains("wknd.site"),     "WebSite URL constant must appear");
+    }
+
+    @Test
+    void graph_includesBreadcrumb_forInnerPages() {
+        // Two-level hierarchy — breadcrumb is meaningful
+        ctx.create().page("/content/wknd");
+        createPage("/content/wknd/magazine", true, "Article");
+
+        String json = adapt("/content/wknd/magazine").getJsonLd();
+
+        assertTrue(json.contains("\"BreadcrumbList\""), "BreadcrumbList must appear on inner pages");
+        assertTrue(json.contains("\"ListItem\""),       "ListItem entries must be present");
+    }
+
+    @Test
+    void graph_noBreadcrumb_forTopLevelPage() {
+        // Page at depth 2 — only one crumb, no trail to show
+        createPage("/content/wknd", true, "WebPage");
+
+        String json = adapt("/content/wknd").getJsonLd();
+
+        assertFalse(json.contains("\"BreadcrumbList\""),
+                "BreadcrumbList must not appear for top-level pages with no meaningful trail");
+    }
+
+    @Test
+    void graph_primarySchemaIsPresent_alsoWithAutoSchemas() {
+        createPage("/content/test", true, "Article");
+
+        String json = adapt("/content/test").getJsonLd();
+
+        assertTrue(json.contains("\"Article\""),      "primary Article node must be present");
+        assertTrue(json.contains("\"Organization\""), "auto Organization must co-exist");
+        assertTrue(json.contains("\"WebSite\""),      "auto WebSite must co-exist");
+    }
 }

@@ -7,6 +7,10 @@
         cq:template="/conf/wknd/settings/wcm/templates/article-page-template"
         jcr:primaryType="cq:PageContent"
         sling:resourceType="wknd/components/page">
+        <seo
+            jcr:primaryType="nt:unstructured"
+            enabled="{Boolean}true"
+            type="Article"/>
         <root
             jcr:primaryType="nt:unstructured"
             sling:resourceType="wknd/components/container"

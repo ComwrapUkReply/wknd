@@ -67,22 +67,20 @@
                             sling:resourceType="granite/ui/components/coral/foundation/form/select"
                             fieldLabel="Default Primary @type"
                             name="./seo/type"
-                            emptyText="Select a type">
+                            emptyText="(None — no page-level schema)">
                             <items jcr:primaryType="nt:unstructured">
-                                <webpage    jcr:primaryType="nt:unstructured" text="WebPage"        value="WebPage" selected="{Boolean}true"/>
-                                <org        jcr:primaryType="nt:unstructured" text="Organization"   value="Organization"/>
-                                <article    jcr:primaryType="nt:unstructured" text="Article"        value="Article"/>
-                                <newsArt    jcr:primaryType="nt:unstructured" text="NewsArticle"    value="NewsArticle"/>
-                                <blog       jcr:primaryType="nt:unstructured" text="BlogPosting"    value="BlogPosting"/>
-                                <product    jcr:primaryType="nt:unstructured" text="Product"        value="Product"/>
-                                <event      jcr:primaryType="nt:unstructured" text="Event"          value="Event"/>
-                                <faq        jcr:primaryType="nt:unstructured" text="FAQPage"        value="FAQPage"/>
-                                <howto      jcr:primaryType="nt:unstructured" text="HowTo"          value="HowTo"/>
-                                <person     jcr:primaryType="nt:unstructured" text="Person"         value="Person"/>
-                                <place      jcr:primaryType="nt:unstructured" text="Place"          value="Place"/>
-                                <recipe     jcr:primaryType="nt:unstructured" text="Recipe"         value="Recipe"/>
-                                <video      jcr:primaryType="nt:unstructured" text="VideoObject"    value="VideoObject"/>
-                                <breadcrumb jcr:primaryType="nt:unstructured" text="BreadcrumbList" value="BreadcrumbList"/>
+                                <none    jcr:primaryType="nt:unstructured" text="(None — no page-level schema)" value=""/>
+                                <article jcr:primaryType="nt:unstructured" text="Article"      value="Article"/>
+                                <newsArt jcr:primaryType="nt:unstructured" text="NewsArticle"  value="NewsArticle"/>
+                                <blog    jcr:primaryType="nt:unstructured" text="BlogPosting"  value="BlogPosting"/>
+                                <audio   jcr:primaryType="nt:unstructured" text="AudioObject"  value="AudioObject"/>
+                                <event   jcr:primaryType="nt:unstructured" text="Event"        value="Event"/>
+                                <faq     jcr:primaryType="nt:unstructured" text="FAQPage"      value="FAQPage"/>
+                                <place   jcr:primaryType="nt:unstructured" text="Place"        value="Place"/>
+                                <video   jcr:primaryType="nt:unstructured" text="VideoObject"  value="VideoObject"/>
+                                <job     jcr:primaryType="nt:unstructured" text="JobPosting"   value="JobPosting"/>
+                                <howto   jcr:primaryType="nt:unstructured" text="HowTo"        value="HowTo"/>
+                                <person  jcr:primaryType="nt:unstructured" text="Person"       value="Person"/>
                             </items>
                         </type>
 
@@ -152,101 +150,240 @@
                             </items>
                         </articleFields>
 
-                        <!-- Organization-specific defaults (Organization only) -->
-                        <organizationFields
+                        <!-- Event-specific defaults (Event only) -->
+                        <eventFields
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/well"
-                            granite:class="wknd-seo-org-fields"
-                            data-show-for-types="Organization">
+                            granite:class="wknd-seo-event-fields"
+                            data-show-for-types="Event">
                             <items jcr:primaryType="nt:unstructured">
-                                <orgHeading
-                                    jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/heading"
-                                    level="{Long}4"
-                                    text="Organization-specific default properties"/>
+                                <eventHeading jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/heading" level="{Long}4" text="Event-specific default properties"/>
+                                <eventStartDate jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/datepicker" fieldLabel="Default Start Date" name="./seo/eventStartDate" type="datetime" displayedFormat="YYYY-MM-DD HH:mm" valueFormat="YYYY-MM-DDTHH:mmZ"/>
+                                <eventEndDate jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/datepicker" fieldLabel="Default End Date" name="./seo/eventEndDate" type="datetime" displayedFormat="YYYY-MM-DD HH:mm" valueFormat="YYYY-MM-DDTHH:mmZ"/>
+                                <eventStatus jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/select" fieldLabel="Default Event Status" name="./seo/eventStatus">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <empty       jcr:primaryType="nt:unstructured" text="(Default)" value=""/>
+                                        <scheduled   jcr:primaryType="nt:unstructured" text="Scheduled" value="https://schema.org/EventScheduled"/>
+                                        <rescheduled jcr:primaryType="nt:unstructured" text="Rescheduled" value="https://schema.org/EventRescheduled"/>
+                                        <postponed   jcr:primaryType="nt:unstructured" text="Postponed" value="https://schema.org/EventPostponed"/>
+                                        <cancelled   jcr:primaryType="nt:unstructured" text="Cancelled" value="https://schema.org/EventCancelled"/>
+                                        <moved       jcr:primaryType="nt:unstructured" text="Moved Online" value="https://schema.org/EventMovedOnline"/>
+                                    </items>
+                                </eventStatus>
+                                <eventAttendanceMode jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/select" fieldLabel="Default Attendance Mode" name="./seo/eventAttendanceMode">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <empty   jcr:primaryType="nt:unstructured" text="(Default)" value=""/>
+                                        <offline jcr:primaryType="nt:unstructured" text="Offline (in person)" value="https://schema.org/OfflineEventAttendanceMode"/>
+                                        <online  jcr:primaryType="nt:unstructured" text="Online" value="https://schema.org/OnlineEventAttendanceMode"/>
+                                        <mixed   jcr:primaryType="nt:unstructured" text="Mixed" value="https://schema.org/MixedEventAttendanceMode"/>
+                                    </items>
+                                </eventAttendanceMode>
+                                <eventLocationName jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Location Name" name="./seo/eventLocationName"/>
+                                <eventLocStreet jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Location Street" name="./seo/eventLocStreet"/>
+                                <eventLocLocality jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Location City" name="./seo/eventLocLocality"/>
+                                <eventLocRegion jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Location Region" name="./seo/eventLocRegion"/>
+                                <eventLocPostalCode jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Location Postal Code" name="./seo/eventLocPostalCode"/>
+                                <eventLocCountry jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Location Country Code" name="./seo/eventLocCountry"/>
+                                <eventLocationUrl jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Online Location URL" name="./seo/eventLocationUrl"/>
+                                <eventOrganizerName jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Organizer Name" name="./seo/eventOrganizerName"/>
+                                <eventOrganizerUrl jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Organizer URL" name="./seo/eventOrganizerUrl"/>
+                                <eventPerformerName jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Performer Name" name="./seo/eventPerformerName"/>
+                                <eventOfferUrl jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Offer URL" name="./seo/eventOfferUrl"/>
+                                <eventOfferPrice jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Offer Price" name="./seo/eventOfferPrice"/>
+                                <eventOfferCurrency jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Offer Currency" name="./seo/eventOfferCurrency"/>
+                                <eventOfferAvailability jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Offer Availability" name="./seo/eventOfferAvailability"/>
+                                <eventOfferValidFrom jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/datepicker" fieldLabel="Default Offer Valid From" name="./seo/eventOfferValidFrom" type="datetime" displayedFormat="YYYY-MM-DD HH:mm" valueFormat="YYYY-MM-DDTHH:mmZ"/>
+                            </items>
+                        </eventFields>
 
-                                <orgLegalName
-                                    jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                    fieldLabel="Default Legal Name"
-                                    name="./seo/orgLegalName"/>
-
-                                <orgLogo
-                                    jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
-                                    fieldLabel="Default Logo"
-                                    name="./seo/orgLogo"
-                                    rootPath="/content/dam"/>
-
-                                <orgTelephone
-                                    jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                    fieldLabel="Default Telephone"
-                                    name="./seo/orgTelephone"/>
-
-                                <orgEmail
-                                    jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                    fieldLabel="Default Email"
-                                    name="./seo/orgEmail"/>
-
-                                <orgSameAs
+                        <!-- FAQPage-specific defaults (FAQPage only) -->
+                        <faqFields
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/well"
+                            granite:class="wknd-seo-faqpage-fields"
+                            data-show-for-types="FAQPage">
+                            <items jcr:primaryType="nt:unstructured">
+                                <faqHeading jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/heading" level="{Long}4" text="Default FAQ items"/>
+                                <faqItems
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
-                                    fieldLabel="Default sameAs URLs">
+                                    fieldLabel="Questions"
+                                    composite="{Boolean}true">
                                     <field
                                         jcr:primaryType="nt:unstructured"
-                                        sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                        name="./seo/orgSameAs"/>
-                                </orgSameAs>
-
-                                <orgFoundingDate
-                                    jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/form/datepicker"
-                                    fieldLabel="Default Founding Date"
-                                    name="./seo/orgFoundingDate"
-                                    type="date"
-                                    displayedFormat="YYYY-MM-DD"
-                                    valueFormat="YYYY-MM-DD"/>
-
-                                <orgAddressHeading
-                                    jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/heading"
-                                    level="{Long}5"
-                                    text="Default Postal Address"/>
-
-                                <orgStreetAddress
-                                    jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                    fieldLabel="Default Street Address"
-                                    name="./seo/orgStreetAddress"/>
-
-                                <orgAddressLocality
-                                    jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                    fieldLabel="Default City"
-                                    name="./seo/orgAddressLocality"/>
-
-                                <orgAddressRegion
-                                    jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                    fieldLabel="Default State / Region"
-                                    name="./seo/orgAddressRegion"/>
-
-                                <orgPostalCode
-                                    jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                    fieldLabel="Default Postal Code"
-                                    name="./seo/orgPostalCode"/>
-
-                                <orgAddressCountry
-                                    jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                    fieldLabel="Default Country Code"
-                                    fieldDescription="ISO 3166-1 alpha-2, e.g. US, GB, DE."
-                                    name="./seo/orgAddressCountry"/>
+                                        sling:resourceType="granite/ui/components/coral/foundation/container"
+                                        name="./seo/faqItems">
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <question jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Question" name="./question"/>
+                                            <answer jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textarea" fieldLabel="Answer" name="./answer" rows="{Long}3"/>
+                                        </items>
+                                    </field>
+                                </faqItems>
                             </items>
-                        </organizationFields>
+                        </faqFields>
+
+                        <!-- HowTo-specific defaults (HowTo only) -->
+                        <howToFields
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/well"
+                            granite:class="wknd-seo-howto-fields"
+                            data-show-for-types="HowTo">
+                            <items jcr:primaryType="nt:unstructured">
+                                <howToHeading jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/heading" level="{Long}4" text="HowTo-specific default properties"/>
+                                <howToTotalTime jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Total Time" fieldDescription="ISO 8601 duration, e.g. PT30M." name="./seo/howToTotalTime"/>
+                                <howToCostCurrency jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Estimated Cost Currency" name="./seo/howToCostCurrency"/>
+                                <howToCostValue jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Estimated Cost Value" name="./seo/howToCostValue"/>
+                                <howToSupplies jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/multifield" fieldLabel="Default Supplies">
+                                    <field jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" name="./seo/howToSupplies"/>
+                                </howToSupplies>
+                                <howToTools jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/multifield" fieldLabel="Default Tools">
+                                    <field jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" name="./seo/howToTools"/>
+                                </howToTools>
+                                <howToSteps
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                    fieldLabel="Default Steps"
+                                    composite="{Boolean}true">
+                                    <field
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/container"
+                                        name="./seo/howToSteps">
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <name jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Step Name" name="./name"/>
+                                            <text jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textarea" fieldLabel="Step Text" name="./text" rows="{Long}2"/>
+                                            <image jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/pathfield" fieldLabel="Step Image" name="./image" rootPath="/content/dam"/>
+                                            <url jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Step URL" name="./url"/>
+                                        </items>
+                                    </field>
+                                </howToSteps>
+                            </items>
+                        </howToFields>
+
+                        <!-- Person-specific defaults (Person only) -->
+                        <personFields
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/well"
+                            granite:class="wknd-seo-person-fields"
+                            data-show-for-types="Person">
+                            <items jcr:primaryType="nt:unstructured">
+                                <personHeading jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/heading" level="{Long}4" text="Person-specific default properties"/>
+                                <personName jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Full Name" name="./seo/personName"/>
+                                <personGivenName jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Given Name" name="./seo/personGivenName"/>
+                                <personFamilyName jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Family Name" name="./seo/personFamilyName"/>
+                                <personJobTitle jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Job Title" name="./seo/personJobTitle"/>
+                                <personWorksFor jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Works For" name="./seo/personWorksFor"/>
+                                <personImage jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/pathfield" fieldLabel="Default Photo" name="./seo/personImage" rootPath="/content/dam"/>
+                                <personUrl jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Profile URL" name="./seo/personUrl"/>
+                                <personEmail jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Email" name="./seo/personEmail"/>
+                                <personTelephone jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Telephone" name="./seo/personTelephone"/>
+                                <personSameAs jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/multifield" fieldLabel="Default sameAs URLs">
+                                    <field jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" name="./seo/personSameAs"/>
+                                </personSameAs>
+                                <personKnowsAbout jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/multifield" fieldLabel="Default Knows About">
+                                    <field jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" name="./seo/personKnowsAbout"/>
+                                </personKnowsAbout>
+                            </items>
+                        </personFields>
+
+                        <!-- Place-specific defaults (Place only) -->
+                        <placeFields
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/well"
+                            granite:class="wknd-seo-place-fields"
+                            data-show-for-types="Place">
+                            <items jcr:primaryType="nt:unstructured">
+                                <placeHeading jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/heading" level="{Long}4" text="Place-specific default properties"/>
+                                <placeName jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Place Name" name="./seo/placeName"/>
+                                <placeStreet jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Street Address" name="./seo/placeStreet"/>
+                                <placeLocality jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default City" name="./seo/placeLocality"/>
+                                <placeRegion jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default State / Region" name="./seo/placeRegion"/>
+                                <placePostalCode jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Postal Code" name="./seo/placePostalCode"/>
+                                <placeCountry jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Country Code" name="./seo/placeCountry"/>
+                                <placeLatitude jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Latitude" name="./seo/placeLatitude"/>
+                                <placeLongitude jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Longitude" name="./seo/placeLongitude"/>
+                                <placeTelephone jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Telephone" name="./seo/placeTelephone"/>
+                                <placeOpeningHours jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Opening Hours" name="./seo/placeOpeningHours"/>
+                            </items>
+                        </placeFields>
+
+                        <!-- JobPosting-specific defaults (JobPosting only) -->
+                        <jobFields
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/well"
+                            granite:class="wknd-seo-jobposting-fields"
+                            data-show-for-types="JobPosting">
+                            <items jcr:primaryType="nt:unstructured">
+                                <jobHeading jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/heading" level="{Long}4" text="JobPosting-specific default properties"/>
+                                <jobTitle jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Job Title" name="./seo/jobTitle"/>
+                                <jobDatePosted jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/datepicker" fieldLabel="Default Date Posted" name="./seo/jobDatePosted" type="date" displayedFormat="YYYY-MM-DD" valueFormat="YYYY-MM-DD"/>
+                                <jobValidThrough jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/datepicker" fieldLabel="Default Valid Through" name="./seo/jobValidThrough" type="date" displayedFormat="YYYY-MM-DD" valueFormat="YYYY-MM-DD"/>
+                                <jobEmploymentType jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/select" fieldLabel="Default Employment Type" name="./seo/jobEmploymentType">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <empty     jcr:primaryType="nt:unstructured" text="(Default)" value=""/>
+                                        <fulltime  jcr:primaryType="nt:unstructured" text="Full Time" value="FULL_TIME"/>
+                                        <parttime  jcr:primaryType="nt:unstructured" text="Part Time" value="PART_TIME"/>
+                                        <contract  jcr:primaryType="nt:unstructured" text="Contractor" value="CONTRACTOR"/>
+                                        <temporary jcr:primaryType="nt:unstructured" text="Temporary" value="TEMPORARY"/>
+                                        <intern    jcr:primaryType="nt:unstructured" text="Intern" value="INTERN"/>
+                                    </items>
+                                </jobEmploymentType>
+                                <jobHiringOrgName jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Hiring Organization Name" name="./seo/jobHiringOrgName"/>
+                                <jobHiringOrgUrl jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Hiring Organization URL" name="./seo/jobHiringOrgUrl"/>
+                                <jobLocStreet jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Job Street Address" name="./seo/jobLocStreet"/>
+                                <jobLocLocality jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Job City" name="./seo/jobLocLocality"/>
+                                <jobLocRegion jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Job Region" name="./seo/jobLocRegion"/>
+                                <jobLocPostalCode jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Job Postal Code" name="./seo/jobLocPostalCode"/>
+                                <jobLocCountry jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Job Country Code" name="./seo/jobLocCountry"/>
+                                <jobLocationType jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Job Location Type" name="./seo/jobLocationType"/>
+                                <jobSalaryCurrency jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Salary Currency" name="./seo/jobSalaryCurrency"/>
+                                <jobSalaryValue jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Salary Value" name="./seo/jobSalaryValue"/>
+                                <jobSalaryUnit jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/select" fieldLabel="Default Salary Unit" name="./seo/jobSalaryUnit">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <empty jcr:primaryType="nt:unstructured" text="(Default)" value=""/>
+                                        <hour  jcr:primaryType="nt:unstructured" text="Per Hour" value="HOUR"/>
+                                        <day   jcr:primaryType="nt:unstructured" text="Per Day" value="DAY"/>
+                                        <week  jcr:primaryType="nt:unstructured" text="Per Week" value="WEEK"/>
+                                        <month jcr:primaryType="nt:unstructured" text="Per Month" value="MONTH"/>
+                                        <year  jcr:primaryType="nt:unstructured" text="Per Year" value="YEAR"/>
+                                    </items>
+                                </jobSalaryUnit>
+                            </items>
+                        </jobFields>
+
+                        <!-- AudioObject-specific defaults (AudioObject only) -->
+                        <audioFields
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/well"
+                            granite:class="wknd-seo-audioobject-fields"
+                            data-show-for-types="AudioObject">
+                            <items jcr:primaryType="nt:unstructured">
+                                <audioHeading jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/heading" level="{Long}4" text="Audio-specific default properties"/>
+                                <audioContentUrl jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Content URL" name="./seo/audioContentUrl"/>
+                                <audioEmbedUrl jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Embed URL" name="./seo/audioEmbedUrl"/>
+                                <audioEncodingFormat jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Encoding Format" name="./seo/audioEncodingFormat"/>
+                                <audioDuration jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Duration" name="./seo/audioDuration"/>
+                                <audioUploadDate jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/datepicker" fieldLabel="Default Upload Date" name="./seo/audioUploadDate" type="date" displayedFormat="YYYY-MM-DD" valueFormat="YYYY-MM-DD"/>
+                                <audioTranscript jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textarea" fieldLabel="Default Transcript" name="./seo/audioTranscript" rows="{Long}3"/>
+                            </items>
+                        </audioFields>
+
+                        <!-- VideoObject-specific defaults (VideoObject only) -->
+                        <videoFields
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/well"
+                            granite:class="wknd-seo-videoobject-fields"
+                            data-show-for-types="VideoObject">
+                            <items jcr:primaryType="nt:unstructured">
+                                <videoHeading jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/heading" level="{Long}4" text="Video-specific default properties"/>
+                                <videoThumbnailUrl jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Thumbnail URL" name="./seo/videoThumbnailUrl"/>
+                                <videoUploadDate jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/datepicker" fieldLabel="Default Upload Date" name="./seo/videoUploadDate" type="datetime" displayedFormat="YYYY-MM-DD HH:mm" valueFormat="YYYY-MM-DDTHH:mmZ"/>
+                                <videoContentUrl jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Content URL" name="./seo/videoContentUrl"/>
+                                <videoEmbedUrl jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Embed URL" name="./seo/videoEmbedUrl"/>
+                                <videoDuration jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textfield" fieldLabel="Default Duration" name="./seo/videoDuration"/>
+                                <videoExpires jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/datepicker" fieldLabel="Default Expires" name="./seo/videoExpires" type="date" displayedFormat="YYYY-MM-DD" valueFormat="YYYY-MM-DD"/>
+                                <videoTranscript jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textarea" fieldLabel="Default Transcript" name="./seo/videoTranscript" rows="{Long}3"/>
+                            </items>
+                        </videoFields>
 
                         <headline
                             jcr:primaryType="nt:unstructured"

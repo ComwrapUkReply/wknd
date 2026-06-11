@@ -8,6 +8,9 @@
         jcr:primaryType="cq:PageContent"
         sling:resourceType="wknd/components/page"
         socialMedia="[facebook,pinterest]">
+        <seo
+            jcr:primaryType="nt:unstructured"
+            enabled="{Boolean}true"/>
         <root
             jcr:primaryType="nt:unstructured"
             sling:resourceType="wknd/components/container"
